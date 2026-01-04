@@ -1,0 +1,30 @@
+{
+    "name": "playwright-test-automation-framework",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "clean:allure": "powershell -Command \"Remove-Item -Recurse -Force allure-results,allure-report -ErrorAction SilentlyContinue\"",
+        "test": "npx playwright test",
+        "smoke": "npm run clean:allure && npx playwright test --grep @smoke",
+        "regression": "npm run clean:allure && npx playwright test --grep @regression",
+        "allure:generate": "allure generate allure-results --clean -o allure-report",
+        "allure:open": "allure open allure-report",
+        "allure:report": "npm run allure:generate && npm run allure:open"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "devDependencies": {
+        "@playwright/test": "^1.57.0",
+        "@types/node": "^25.0.3",
+        "allure-commandline": "^2.36.0",
+        "allure-playwright": "^3.4.3"
+    },
+    "dependencies": {
+        "dotenv": "^17.2.3"
+    },
+    "directories": {
+        "test": "tests"
+    }
+}

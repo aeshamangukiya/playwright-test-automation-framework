@@ -1,0 +1,93 @@
+# Node modules
+node_modules/
+
+# Playwright test results
+/test-results/
+/playwright-report/
+/blob-report/
+
+/playwright/.cache/
+/playwright/.auth/
+
+# Playwright media artifacts
+/videos/
+/screenshots/
+/trace/
+*.mp4
+*.webm
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+
+# Build outputs
+dist/
+build/
+out/
+*.tsbuildinfo
+
+# Coverage
+coverage/
+*.lcov
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.log
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# OS files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*.bak
+*.old
+
+# Executables / binaries
+*.exe
+*.dll
+*.so
+*.dylib
+*.bin
+*.out
+
+# Editor / IDE files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.code-workspace
+
+# Misc
+*.class
+*.pyc
+*.pyo
+*.pyd
+*.log
+*.cache
+
+# Node lock files (optional if you want to ignore)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+allure-results/
+allure-report/
+storage/
+
+.github/
