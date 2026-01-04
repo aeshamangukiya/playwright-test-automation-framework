@@ -51,8 +51,8 @@ It is designed to be **scalable, maintainable, and CI/CD-ready**, following mode
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/aeshamangukiya/playwright-automation-practice
-cd playwright-automation-practice
+git clone https://github.com/aeshamangukiya/playwright-test-automation-framework
+cd playwright-test-automation-framework
 ```
 
 ### 2. Install Dependencies
@@ -140,18 +140,37 @@ npm install
 
 **tests/auth/login.spec.ts**
 ```ts
-import { test, expect } from '@playwright/test';
-import { LoginPage } from '../../pages/LoginPage';
-import testData from '../../fixtures/testData.json';
+import { test } from '../../src/fixtures/auth.fixture';
+import { UserRole } from '../../src/constants/roles';
+import { DashboardPage } from '../../src/pages/dashboard/DashboardPage';
+import { LoginPage } from '../../src/pages/auth/LoginPage';
+import { Logger } from '../../src/utils/Logger';
 
-test('Verify user can login with valid credentials', async ({ page }) => {
-  const loginPage = new LoginPage(page);
+const TEST_ROLE = process.env.TEST_ROLE;
 
-  await loginPage.navigateTo('/');
-  await loginPage.login(testData.validUser.username, testData.validUser.password);
+/* =========================================================
+   Login – Single User (Smoke + Regression)
+========================================================= */
+test.describe('Login – Single User', () => {
 
-  await expect(page).toHaveURL(/.*dashboard/);
+  test(
+    'User can login successfully',
+    { tag: ['@smoke', '@regression'] },
+    async ({ loginAs, page }, testInfo) => {
+
+      testInfo.annotations.push(
+        { type: 'severity', description: 'critical' }
+      );
+
+      Logger.step('Logging in as User');
+      await loginAs(UserRole.USER);
+
+     const dashboard = new DashboardPage(page);
+     await dashboard.verifyDashboardLoaded();
+    }
+  );
 });
+
 ```
 ---
 

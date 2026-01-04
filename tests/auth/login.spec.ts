@@ -6,7 +6,6 @@ import { Logger } from '../../src/utils/Logger';
 
 const TEST_ROLE = process.env.TEST_ROLE;
 
-
 /* =========================================================
    Login – Single User (Smoke + Regression)
 ========================================================= */
