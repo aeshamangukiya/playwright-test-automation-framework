@@ -47,31 +47,82 @@ It is designed to be **scalable, maintainable, and CI/CD-ready**, following mode
 - Centralized utilities for waits, assertions, and logging  
 
 ---
+## Getting Started
 
+### 1. Clone the Repository
+```bash
+git clone https://github.com/aeshamangukiya/playwright-automation-practice
+cd playwright-automation-practice
+```
+
+### 2. Install Dependencies
+```bash
+npm install
+```
+
+### 3. Run Tests
+- Run all tests:
+  ```bash
+  npx playwright test
+  ```
+
+- Run with headed browser:
+  ```bash
+  npx playwright test --headed
+  ```
+
+- Run specific file:
+  ```bash
+  npx playwright test tests/auth/login.spec.ts
+  ```
+
+- Run with UI Mode:
+  ```bash
+  npx playwright test --ui
+  ```
+
+### 4. Generate Reports
+- View Playwright HTML report:
+  ```bash
+  npx playwright show-report
+  ```
+
+- Allure Report (if configured):
+  ```bash
+  allure generate allure-results --clean -o allure-report
+  allure open allure-report
+  ```
+
+---
 ## Project Structure
+<details> <summary>Click to expand</summary>
 
 ```text
-playwright-test-automation-framework/
-├── src/
-│   ├── config/          # Environment, URLs, devices
-│   ├── constants/       # Roles, permissions, messages
-│   ├── fixtures/        # Auth and custom fixtures
-│   ├── pages/           # Page Objects
-│   ├── services/        # Helper services
-│   ├── test-data/       # Test data
-│   └── utils/           # Waits, assertions, logger
-│
-├── tests/
-│   ├── auth/             # Authentication tests
-│   ├── dashboard/        # Dashboard tests
-│   └── setup/            # Test setup and auth state
-│
-├── playwright.config.ts
-├── package.json
-├── smoke.bat
-├── regression.bat
-└── README.md
+📁 playwright-test-automation-framework/
+├── 📄 playwright.config.ts        # Global configuration (baseURL, retries, etc.)
+├── 📄 package.json                # NPM dependencies & scripts
+├── 📄 tsconfig.json               # TypeScript configuration
+
+📁 tests/                          # Test specs
+│   ├── 📁 auth/
+│   │   └── login.spec.ts          # Login tests
+│   ├── 📁 dashboard/
+│   │   └── dashboard.spec.ts      # Dashboard tests
+│   └── other-feature.spec.ts
+
+📁 pages/                          # Page Object Model (POM) classes
+│   └── LoginPage.ts
+│   └── DashboardPage.ts
+
+📁 fixtures/                       # Test data, custom fixtures
+│   └── testData.json
+
+📁 utils/                          # Helper utilities
+│   └── helpers.ts
+
+📁 reports/                        # Auto-generated HTML & Allure reports
 ```
+</details>
 
 ---
 
@@ -82,6 +133,35 @@ playwright-test-automation-framework/
 - Dashboard access and navigation
 - Role-based user validations
 - Smoke and regression scenarios
+
+---
+
+## Sample Test Case
+
+**tests/auth/login.spec.ts**
+```ts
+import { test, expect } from '@playwright/test';
+import { LoginPage } from '../../pages/LoginPage';
+import testData from '../../fixtures/testData.json';
+
+test('Verify user can login with valid credentials', async ({ page }) => {
+  const loginPage = new LoginPage(page);
+
+  await loginPage.navigateTo('/');
+  await loginPage.login(testData.validUser.username, testData.validUser.password);
+
+  await expect(page).toHaveURL(/.*dashboard/);
+});
+```
+---
+
+## Naming Conventions
+
+| Component        | Convention | Example                         |
+| ---------------- | ---------- | ------------------------------- |
+| Packages/Folders | kebab-case | `tests/auth`, `utils/helpers`   |
+| Classes          | PascalCase | `LoginPage.ts`, `DashboardPage.ts` |
+| Methods/Vars     | camelCase  | `navigateTo()`, `isUserLoggedIn` |
 
 ---
 
@@ -103,15 +183,14 @@ regression.bat
 
 ---
 
-## Reporting
-
-- Playwright HTML Report
-- Allure Results (if enabled)
-- Test results stored under `test-results/`
+## Reporting & Logging
+- **Playwright HTML Report:** Generated automatically after execution in `/playwright-report/`.
+- **Allure Report:** Generated if configured via `allure-playwright`.
+- **Screenshots, Videos & Traces:** Stored automatically under `test-results/`.
 
 ---
 
-## Author
-
-**Aesha Mangukiya**  
-QA Engineer 
+## Contact & Credits
+- Maintained by: **Aesha Mangukiya**  
+- Email: **aeshamangukiya1@gmail.com**  
+- GitHub: [aeshamangukiya](https://github.com/aeshamangukiya)
