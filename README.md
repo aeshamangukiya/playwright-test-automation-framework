@@ -1,5 +1,5 @@
-# playwright-test-automation-framewor 
-### *End-to-End Web Automation using Playwright & TypeScript*
+# playwright-test-automation-framework 
+### *Built with Playwright, TypeScript, Test Runner, Allure Reports & Page Object Model (POM)*
 
 ---
 
