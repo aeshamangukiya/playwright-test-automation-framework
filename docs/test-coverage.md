@@ -1,6 +1,6 @@
 # Test Coverage Documentation
 
-## 📊 Complete Test Case Overview
+##  Complete Test Case Overview
 
 This document provides a comprehensive overview of all test cases in the framework, organized by feature and test type.
 
@@ -17,10 +17,10 @@ This document provides a comprehensive overview of all test cases in the framewo
 | AUTH-003 | User can login directly using login page | @regression | Tests direct login flow using LoginPage without fixtures |
 
 **Coverage:**
-- ✅ Role-based authentication (User/Admin)
-- ✅ Session establishment
-- ✅ Post-login redirection to Dashboard
-- ✅ Storage state creation
+-  Role-based authentication (User/Admin)
+-  Session establishment
+-  Post-login redirection to Dashboard
+-  Storage state creation
 
 ---
 
@@ -33,10 +33,10 @@ This document provides a comprehensive overview of all test cases in the framewo
 | AUTH-103 | Login fails with both invalid credentials | @regression, @negative | Validates error handling when both username and password are invalid |
 
 **Coverage:**
-- ✅ Invalid credential rejection
-- ✅ Error message display
-- ✅ Security validation
-- ✅ Failed login handling
+-  Invalid credential rejection
+-  Error message display
+-  Security validation
+-  Failed login handling
 
 ---
 
@@ -49,10 +49,10 @@ This document provides a comprehensive overview of all test cases in the framewo
 | AUTH-106 | Login fails with both fields empty | @regression, @validation | Validates form validation when both fields are empty |
 
 **Coverage:**
-- ✅ Form field validation
-- ✅ Required field enforcement
-- ✅ Empty input handling
-- ✅ Client-side validation
+-  Form field validation
+-  Required field enforcement
+-  Empty input handling
+-  Client-side validation
 
 ---
 
@@ -64,10 +64,10 @@ This document provides a comprehensive overview of all test cases in the framewo
 | ROLE-002 | Admin has full system access | @regression, @rbac | Validates Admin role has full system access post-login |
 
 **Coverage:**
-- ✅ User role permissions
-- ✅ Admin role permissions
-- ✅ Role-based dashboard access
-- ✅ Access control verification
+-  User role permissions
+-  Admin role permissions
+-  Role-based dashboard access
+-  Access control verification
 
 ---
 
@@ -82,10 +82,10 @@ This document provides a comprehensive overview of all test cases in the framewo
 | DASH-003 | User can navigate to dashboard directly | @regression | Validates direct URL navigation to dashboard for User role |
 
 **Coverage:**
-- ✅ User role dashboard access
-- ✅ Dashboard element visibility
-- ✅ Navigation validation
-- ✅ URL verification
+-  User role dashboard access
+-  Dashboard element visibility
+-  Navigation validation
+-  URL verification
 
 ---
 
@@ -98,10 +98,10 @@ This document provides a comprehensive overview of all test cases in the framewo
 | DASH-103 | Admin can navigate to dashboard directly | @regression | Validates direct URL navigation to dashboard for Admin role |
 
 **Coverage:**
-- ✅ Admin role dashboard access
-- ✅ Dashboard element visibility
-- ✅ Navigation validation
-- ✅ URL verification
+-  Admin role dashboard access
+-  Dashboard element visibility
+-  Navigation validation
+-  URL verification
 
 ---
 
@@ -113,10 +113,10 @@ This document provides a comprehensive overview of all test cases in the framewo
 | DASH-202 | Dashboard loads after login | @regression | Validates dashboard loads correctly after authentication |
 
 **Coverage:**
-- ✅ Post-login navigation
-- ✅ Dashboard loading
-- ✅ Element visibility
-- ✅ Session validation
+-  Post-login navigation
+-  Dashboard loading
+-  Element visibility
+-  Session validation
 
 ---
 
