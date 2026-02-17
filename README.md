@@ -7,45 +7,45 @@
 
 **Production-ready E2E test automation framework for [OrangeHRM](https://www.orangehrm.com/) using Playwright, TypeScript, Allure Reports & Page Object Model (POM).**
 
-> ✨ **Demo & Reference Implementation** - This framework is designed as a comprehensive reference for GitHub users to understand enterprise-level Playwright test automation patterns and best practices.
+>  **Demo & Reference Implementation** - This framework is designed as a comprehensive reference for GitHub users to understand enterprise-level Playwright test automation patterns and best practices.
 
 ---
 
-## 📋 Overview
+##  Overview
 
 This project is a **production-grade, end-to-end test automation framework** for **OrangeHRM** (open-source HR management system). It demonstrates comprehensive testing patterns including **authentication**, **dashboard verification**, and **role-based access control (RBAC)** using the official demo instance: **https://opensource-demo.orangehrmlive.com**.
 
 The framework is **enterprise-ready, scalable, maintainable, and fully CI/CD-integrated** with:
-- ✅ Environment-based configuration
-- ✅ Role-based fixtures (User / Admin)
-- ✅ Shared authentication state for faster execution
-- ✅ Advanced GitHub Actions CI/CD pipeline with parallel execution
-- ✅ Comprehensive test coverage (positive, negative, validation, RBAC)
+-  Environment-based configuration
+-  Role-based fixtures (User / Admin)
+-  Shared authentication state for faster execution
+-  Advanced GitHub Actions CI/CD pipeline with parallel execution
+-  Comprehensive test coverage (positive, negative, validation, RBAC)
 
 ---
 
-## 🎯 What is Tested
+##  What is Tested
 
 ### **Authentication Tests**
-- ✅ **Positive Scenarios**: User login, Admin login, direct login via LoginPage
-- ✅ **Negative Scenarios**: Invalid username, invalid password, both invalid
-- ✅ **Validation Tests**: Empty username, empty password, both fields empty
-- ✅ **RBAC Tests**: User role access, Admin role access
+-  **Positive Scenarios**: User login, Admin login, direct login via LoginPage
+-  **Negative Scenarios**: Invalid username, invalid password, both invalid
+-  **Validation Tests**: Empty username, empty password, both fields empty
+-  **RBAC Tests**: User role access, Admin role access
 
 ### **Dashboard Tests**
-- ✅ **User Role**: Dashboard access, Assign Leave visibility, direct navigation
-- ✅ **Admin Role**: Dashboard access, Assign Leave visibility, direct navigation
-- ✅ **Common**: Post-login navigation, element visibility checks
+-  **User Role**: Dashboard access, Assign Leave visibility, direct navigation
+-  **Admin Role**: Dashboard access, Assign Leave visibility, direct navigation
+-  **Common**: Post-login navigation, element visibility checks
 
 ### **Technical Coverage**
-- 🔐 Session handling & storage state reuse
-- 🔄 Role-based authentication via `loginAs(USER_ROLES.USER)` and `loginAs(USER_ROLES.ADMIN)`
-- 🚦 URL validation and navigation patterns
-- 📊 Business-level assertions and logging
+-  Session handling & storage state reuse
+-  Role-based authentication via `loginAs(USER_ROLES.USER)` and `loginAs(USER_ROLES.ADMIN)`
+-  URL validation and navigation patterns
+-  Business-level assertions and logging
 
 ---
 
-## 📊 Test Coverage
+##  Test Coverage
 
 The framework includes **15 comprehensive test cases** covering:
 
@@ -57,8 +57,8 @@ The framework includes **15 comprehensive test cases** covering:
 | **RBAC Tests** (Role-based access) | 2 | @regression, @rbac |
 
 **Test Breakdown by Feature:**
-- 🔐 **Authentication**: 11 tests (login success, failures, validation, RBAC)
-- 📊 **Dashboard**: 8 tests (User/Admin access, navigation, elements)
+-  **Authentication**: 11 tests (login success, failures, validation, RBAC)
+-  **Dashboard**: 8 tests (User/Admin access, navigation, elements)
 
 **Execution Options:**
 - **Smoke Suite** (`@smoke`): 8 tests, ~2-3 min - Critical path validation
@@ -69,7 +69,7 @@ The framework includes **15 comprehensive test cases** covering:
 
 ---
 
-## ✨ Key Features
+##  Key Features
 
 - **Page Object Model (POM)** — `BasePage` + feature pages (e.g. `LoginPage`, `DashboardPage`)
 - **Custom fixtures** — `loginAs(role)` for User or Admin, shared `loginPage` and `dashboardPage`
@@ -104,7 +104,7 @@ The framework includes **15 comprehensive test cases** covering:
 
 ---
 
-## 📚 Documentation
+## Documentation
 
 | Document | Description |
 |----------|-------------|
@@ -115,7 +115,7 @@ The framework includes **15 comprehensive test cases** covering:
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### 1. Clone the repository
 
@@ -240,7 +240,7 @@ playwright-test-automation-framework/
 
 ---
 
-## 📝 Sample Tests
+## Sample Tests
 
 ### **Positive Login Test**
 
@@ -270,7 +270,7 @@ test.describe('Login Tests - Positive Scenarios', () => {
             const dashboard = new DashboardPage(page);
             await dashboard.verifyDashboardLoaded();
 
-            Logger.info('✅ User login successful - Dashboard accessible');
+            Logger.info('User login successful - Dashboard accessible');
         }
     );
 });
@@ -299,7 +299,7 @@ test.describe('Login Tests - Negative Scenarios', () => {
             Logger.step('Step 3: Verify error message is displayed');
             await loginPage.verifyErrorMessage(MESSAGES.LOGIN_FAILED);
 
-            Logger.info('✅ Invalid username correctly rejected');
+            Logger.info('Invalid username correctly rejected');
         }
     );
 });
@@ -323,7 +323,7 @@ test.describe('Dashboard Tests - Admin Role', () => {
             Logger.step('Step 1: Verify Admin dashboard loads');
             await adminPage.verifyDashboardLoaded();
 
-            Logger.info('✅ Admin dashboard accessible');
+            Logger.info('Admin dashboard accessible');
         }
     );
 });
@@ -399,18 +399,18 @@ Behind the scenes, credentials are read from `.env` through `config/env.ts` and 
 
 ---
 
-## 🚀 CI/CD - GitHub Actions
+## CI/CD - GitHub Actions
 
 The framework includes a **production-ready GitHub Actions workflow** with advanced features:
 
 ### **Pipeline Features**
-- ✅ **Multi-job execution**: Smoke tests (fast feedback) + Regression tests (full coverage)
-- ✅ **Test sharding**: Parallel execution across 2 runners for faster completion
-- ✅ **Conditional execution**: Smart triggers based on event type (push/PR/manual)
-- ✅ **Manual dispatch**: Run specific test suites on-demand via workflow_dispatch
-- ✅ **Combined reporting**: Aggregates Allure results from all shards
-- ✅ **Artifact management**: Separate retention policies for different report types
-- ✅ **Test summary**: Auto-generated summary in GitHub Actions UI
+-  **Multi-job execution**: Smoke tests (fast feedback) + Regression tests (full coverage)
+-  **Test sharding**: Parallel execution across 2 runners for faster completion
+-  **Conditional execution**: Smart triggers based on event type (push/PR/manual)
+-  **Manual dispatch**: Run specific test suites on-demand via workflow_dispatch
+-  **Combined reporting**: Aggregates Allure results from all shards
+-  **Artifact management**: Separate retention policies for different report types
+-  **Test summary**: Auto-generated summary in GitHub Actions UI
 
 ### **Workflow Jobs**
 
@@ -507,13 +507,11 @@ See **[CHANGELOG.md](CHANGELOG.md)** for detailed release notes and version hist
 
 ---
 
-## License
 
-ISC
-
+## Contact & Credits
+- Maintained by: Aesha Mangukiya
+- Email: aeshamangukiya1@gmail.com
+- GitHub: [GitHub: aeshamangukiya](https://github.com/aeshamangukiya)
+  
 ---
-
-*OrangeHRM demo: [opensource-demo.orangehrmlive.com](https://opensource-demo.orangehrmlive.com)*
-
-**Made with ❤️ for the testing community** 🎭
 
