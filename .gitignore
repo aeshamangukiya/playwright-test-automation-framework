@@ -89,5 +89,3 @@ pnpm-lock.yaml
 allure-results/
 allure-report/
 storage/
-
-.github/

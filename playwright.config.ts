@@ -1,9 +1,11 @@
 import { defineConfig } from '@playwright/test';
-import { ENV } from './src/config/env';
+import { ENV } from './config/env';
+import { BROWSER_CONFIG } from './config/browser';
+import { APP_CONSTANTS } from './lib/data/constants/app-constants';
 
 export default defineConfig({
-  testDir: './tests',
-  timeout: 60_000,
+  testDir: './specs',
+  timeout: BROWSER_CONFIG.TIMEOUTS.TEST,
   retries: 0,
 
   reporter: [
@@ -11,7 +13,7 @@ export default defineConfig({
     [
       'html',
       {
-        open: !process.env.CI ? 'always' : 'never', // open HTML report only on local runs
+        open: 'never',
       },
     ],
     [
@@ -27,11 +29,12 @@ export default defineConfig({
 
   use: {
     headless: process.env.CI === 'true',
-    actionTimeout: 10_000,
-    navigationTimeout: 15_000,
+    actionTimeout: BROWSER_CONFIG.TIMEOUTS.ACTION,
+    navigationTimeout: BROWSER_CONFIG.TIMEOUTS.NAVIGATION,
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
     trace: 'retain-on-failure',
+    baseURL: ENV.BASE_URL,
   },
 
   projects: [
@@ -42,7 +45,6 @@ export default defineConfig({
       use: {
         browserName: 'chromium',
         channel: 'chrome',
-        baseURL: ENV.BASE_URL,
         launchOptions:
           process.env.CI === 'true'
             ? {
@@ -56,13 +58,12 @@ export default defineConfig({
     {
       name: 'after-login',
       dependencies: ['prepare-auth'],
-      testIgnore: /.*login\.spec\.ts/, // IMPORTANT LINE
+      testIgnore: /.*login\.spec\.ts/, // Exclude login tests
       use: {
         browserName: 'chromium',
         channel: 'chrome',
-        baseURL: ENV.BASE_URL,
-        storageState: 'storage/user.auth.json',
-        
+        storageState: APP_CONSTANTS.STORAGE_PATH,
+
         launchOptions:
           process.env.CI === 'true'
             ? {
@@ -72,18 +73,17 @@ export default defineConfig({
       },
     },
 
-  // BEFORE-LOGIN PROJECT (LOGIN TESTS)
-  {
-    name: 'before-login',
-    dependencies: ['prepare-auth'],
-    testMatch: /.*login\.spec\.ts/,
-    use: {
-      browserName: 'chromium',
-      channel: 'chrome',
-      baseURL: ENV.BASE_URL,
-      storageState: undefined, // KEY LINE
+    // BEFORE-LOGIN PROJECT (LOGIN TESTS)
+    {
+      name: 'before-login',
+      dependencies: ['prepare-auth'], // Optional dependency if independent
+      testMatch: /.*login\.spec\.ts/,
+      use: {
+        browserName: 'chromium',
+        channel: 'chrome',
+        storageState: undefined, // Ensure fresh session
+      },
     },
-  },
   ],
 });
 
