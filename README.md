@@ -65,7 +65,7 @@ The framework includes **15 comprehensive test cases** covering:
 - **Regression Suite** (`@regression`): 15 tests, ~8-10 min - Full coverage
 - **Tag Filtering**: `@critical`, `@negative`, `@validation`, `@rbac`
 
-📖 **[View Complete Test Coverage Documentation](docs/test-coverage.md)** - Detailed test case listing, execution strategies, and statistics.
+ **[View Complete Test Coverage Documentation](docs/test-coverage.md)** - Detailed test case listing, execution strategies, and statistics.
 
 ---
 
@@ -490,7 +490,7 @@ ISC
 
 ---
 
-## 📋 Version History
+##  Version History
 
 See **[CHANGELOG.md](CHANGELOG.md)** for detailed release notes and version history.
 
@@ -498,7 +498,7 @@ See **[CHANGELOG.md](CHANGELOG.md)** for detailed release notes and version hist
 
 ---
 
-## 📚 Additional Resources
+##  Additional Resources
 
 - **[Playwright Documentation](https://playwright.dev)** - Official Playwright docs
 - **[OrangeHRM Demo](https://opensource-demo.orangehrmlive.com)** - Live demo application
