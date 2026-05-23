@@ -1,6 +1,8 @@
 version: 2
 updates:
-  # npm dependencies
+  # ===========================================================================
+  #  npm dependencies
+  # ===========================================================================
   - package-ecosystem: 'npm'
     directory: '/'
     schedule:
@@ -8,13 +10,19 @@ updates:
       day: 'monday'
       time: '06:00'
       timezone: 'Asia/Kolkata'
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 3
     labels:
       - 'dependencies'
       - 'npm'
     commit-message:
       prefix: 'chore'
       include: 'scope'
+    # Group strategy:
+    #   - Playwright + Allure: always bundled (they release together).
+    #   - @types/*: bundled — pure type updates.
+    #   - All remaining minor/patch updates: bundled by dev vs prod.
+    #   - MAJOR bumps outside the named groups: open as individual PRs
+    #     so each gets its own review (e.g. TypeScript 5 -> 6).
     groups:
       playwright:
         patterns:
@@ -24,8 +32,20 @@ updates:
       types:
         patterns:
           - '@types/*'
+      dev-dependencies:
+        dependency-type: 'development'
+        update-types:
+          - 'minor'
+          - 'patch'
+      production-dependencies:
+        dependency-type: 'production'
+        update-types:
+          - 'minor'
+          - 'patch'
 
-  # GitHub Actions
+  # ===========================================================================
+  #  GitHub Actions used by .github/workflows/*.yml
+  # ===========================================================================
   - package-ecosystem: 'github-actions'
     directory: '/'
     schedule:
@@ -33,10 +53,17 @@ updates:
       day: 'monday'
       time: '06:00'
       timezone: 'Asia/Kolkata'
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 1
     labels:
       - 'dependencies'
       - 'github-actions'
     commit-message:
       prefix: 'ci'
       include: 'scope'
+    # Bundle every GitHub Actions update into a single weekly PR — these are
+    # almost always trivial version bumps with no breaking changes worth
+    # splitting across multiple PRs.
+    groups:
+      actions:
+        patterns:
+          - '*'
