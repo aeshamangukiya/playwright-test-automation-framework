@@ -40,10 +40,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '20'
           cache: 'npm'
@@ -53,7 +53,7 @@ jobs:
 
       - name: Cache Playwright browsers
         id: playwright-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-${{ hashFiles('package-lock.json') }}
@@ -81,7 +81,7 @@ jobs:
 
       - name: Upload Playwright HTML report (shard)
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: playwright-report-regression-shard-${{ matrix.shard }}
           path: playwright-report/
@@ -89,7 +89,7 @@ jobs:
 
       - name: Upload Allure results (shard)
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: allure-results-regression-shard-${{ matrix.shard }}
           path: allure-results/
@@ -97,7 +97,7 @@ jobs:
 
       - name: Upload trace / screenshots on failure
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: test-results-regression-shard-${{ matrix.shard }}
           path: test-results/
@@ -112,16 +112,16 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '20'
           cache: 'npm'
 
       - name: Download Allure results from shards
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           path: allure-results-combined
           pattern: allure-results-regression-shard-*
@@ -134,7 +134,7 @@ jobs:
         run: npx allure generate allure-results-combined -o allure-report --clean
 
       - name: Upload combined Allure report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: allure-report-regression
           path: allure-report/
