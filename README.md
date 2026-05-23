@@ -1,519 +1,358 @@
-## OrangeHRM – Playwright Test Automation Framework
+<h1 align="center">Playwright Test Automation Framework</h1>
 
-[![Playwright](https://img.shields.io/badge/tested%20with-Playwright-45ba4b)](https://playwright.dev)
-[![TypeScript](https://img.shields.io/badge/language-TypeScript-3178c6)](https://www.typescriptlang.org/)
-[![CI/CD](https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-2088FF)](https://github.com/features/actions)
-[![License: ISC](https://img.shields.io/badge/license-ISC-blue.svg)](LICENSE)
+<p align="center">
+  <em>Enterprise-grade end-to-end test automation for the <a href="https://opensource-demo.orangehrmlive.com">OrangeHRM</a> open-source demo, built on Playwright + TypeScript with a strict Page Object Model architecture.</em>
+</p>
 
-**Production-ready E2E test automation framework for [OrangeHRM](https://www.orangehrm.com/) using Playwright, TypeScript, Allure Reports & Page Object Model (POM).**
+<p align="center">
+  <a href="https://github.com/aeshamangukiya/playwright-test-automation-framework/actions/workflows/smoke.yml"><img src="https://img.shields.io/github/actions/workflow/status/aeshamangukiya/playwright-test-automation-framework/smoke.yml?branch=master&label=smoke&logo=github" alt="Smoke" /></a>
+  <a href="https://github.com/aeshamangukiya/playwright-test-automation-framework/actions/workflows/regression.yml"><img src="https://img.shields.io/github/actions/workflow/status/aeshamangukiya/playwright-test-automation-framework/regression.yml?branch=master&label=regression&logo=github" alt="Regression" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License" /></a>
+  <img src="https://img.shields.io/badge/node-%E2%89%A520.x-339933?logo=node.js" alt="Node 20+" />
+  <img src="https://img.shields.io/badge/playwright-1.57+-45ba4b?logo=playwright" alt="Playwright" />
+  <img src="https://img.shields.io/badge/typescript-strict-3178c6?logo=typescript" alt="TypeScript strict" />
+  <a href="CONTRIBUTING.md"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs welcome" /></a>
+</p>
 
-> ✨ **Demo & Reference Implementation** - This framework is designed as a comprehensive reference for GitHub users to understand enterprise-level Playwright test automation patterns and best practices.
-
----
-
-## 📋 Overview
-
-This project is a **production-grade, end-to-end test automation framework** for **OrangeHRM** (open-source HR management system). It demonstrates comprehensive testing patterns including **authentication**, **dashboard verification**, and **role-based access control (RBAC)** using the official demo instance: **https://opensource-demo.orangehrmlive.com**.
-
-The framework is **enterprise-ready, scalable, maintainable, and fully CI/CD-integrated** with:
-- ✅ Environment-based configuration
-- ✅ Role-based fixtures (User / Admin)
-- ✅ Shared authentication state for faster execution
-- ✅ Advanced GitHub Actions CI/CD pipeline with parallel execution
-- ✅ Comprehensive test coverage (positive, negative, validation, RBAC)
-
----
-
-## 🎯 What is Tested
-
-### **Authentication Tests**
-- ✅ **Positive Scenarios**: User login, Admin login, direct login via LoginPage
-- ✅ **Negative Scenarios**: Invalid username, invalid password, both invalid
-- ✅ **Validation Tests**: Empty username, empty password, both fields empty
-- ✅ **RBAC Tests**: User role access, Admin role access
-
-### **Dashboard Tests**
-- ✅ **User Role**: Dashboard access, Assign Leave visibility, direct navigation
-- ✅ **Admin Role**: Dashboard access, Assign Leave visibility, direct navigation
-- ✅ **Common**: Post-login navigation, element visibility checks
-
-### **Technical Coverage**
-- 🔐 Session handling & storage state reuse
-- 🔄 Role-based authentication via `loginAs(USER_ROLES.USER)` and `loginAs(USER_ROLES.ADMIN)`
-- 🚦 URL validation and navigation patterns
-- 📊 Business-level assertions and logging
+<p align="center">
+  <a href="docs/quick-start.md">⚡ Quick Start</a> ·
+  <a href="docs/setup-guide.md">🛠️ Setup Guide</a> ·
+  <a href="docs/architecture.md">🏗️ Architecture</a> ·
+  <a href="docs/test-coverage.md">🧪 Test Coverage</a> ·
+  <a href="docs/runbook.md">📓 Runbook</a> ·
+  <a href="docs/troubleshooting.md">🆘 Troubleshooting</a>
+</p>
 
 ---
 
-## 📊 Test Coverage
+## Table of Contents
 
-The framework includes **15 comprehensive test cases** covering:
-
-| Category | Test Count | Tags |
-|----------|-----------|------|
-| **Positive Tests** (Success scenarios) | 9 | @smoke, @regression, @critical |
-| **Negative Tests** (Error handling) | 3 | @regression, @negative |
-| **Validation Tests** (Form validation) | 3 | @regression, @validation |
-| **RBAC Tests** (Role-based access) | 2 | @regression, @rbac |
-
-**Test Breakdown by Feature:**
-- 🔐 **Authentication**: 11 tests (login success, failures, validation, RBAC)
-- 📊 **Dashboard**: 8 tests (User/Admin access, navigation, elements)
-
-**Execution Options:**
-- **Smoke Suite** (`@smoke`): 8 tests, ~2-3 min - Critical path validation
-- **Regression Suite** (`@regression`): 15 tests, ~8-10 min - Full coverage
-- **Tag Filtering**: `@critical`, `@negative`, `@validation`, `@rbac`
-
-📖 **[View Complete Test Coverage Documentation](docs/test-coverage.md)** - Detailed test case listing, execution strategies, and statistics.
+- [Overview](#overview)
+- [Key Features](#key-features)
+- [Tech Stack](#tech-stack)
+- [Quick Start](#quick-start)
+- [Project Structure](#project-structure)
+- [Test Projects](#test-projects)
+- [NPM Scripts](#npm-scripts)
+- [Tagging Strategy](#tagging-strategy)
+- [Role-Based Fixtures](#role-based-fixtures)
+- [Sample Tests](#sample-tests)
+- [Reporting](#reporting)
+- [Continuous Integration](#continuous-integration)
+- [Documentation](#documentation)
+- [Contributing](#contributing)
+- [Security](#security)
+- [License](#license)
 
 ---
 
-## ✨ Key Features
+## Overview
 
-- **Page Object Model (POM)** — `BasePage` + feature pages (e.g. `LoginPage`, `DashboardPage`)
-- **Custom fixtures** — `loginAs(role)` for User or Admin, shared `loginPage` and `dashboardPage`
-- **Auth setup project** — Login once in `auth.setup.ts`, persist state to `storage/user.auth.json` for dependent tests
-- **Environment-based config** — Staging/production base URL and users via `.env` (see `.env.example`)
-- **Centralized config** — `config/env.ts`, `config/browser.ts`, `config/urls.ts` for ENV, timeouts, and app routes
-- **Dual reporting** — Playwright HTML report + Allure
-- **Tagged execution** — `@smoke`, `@regression`, `@critical` for selective runs
-- **Helpers** — `Logger`, `AssertionHelper`, `Wait`; constants in `lib/data/constants` (roles, messages, UI, app)
+This repository is a **production-grade reference implementation** of a Playwright
+test framework. It is designed to be cloned, studied, and adapted by teams that
+want enterprise-style architecture without starting from scratch.
+
+It targets the **OrangeHRM open-source demo** ( `https://opensource-demo.orangehrmlive.com` )
+because it offers stable, public, role-based functionality — but every layer
+(config, pages, fixtures, helpers, CI) is generic and swap-friendly for any
+other application under test.
+
+> 💡 **Goal:** demonstrate _how to structure_ a Playwright project, not just _how to write_ tests.
+
+---
+
+## Key Features
+
+| Capability                       | What you get                                                                                                          |
+| -------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| **Page Object Model**            | `BasePage` with stable primitives (`stableFill`, `click`, `expectVisible`) extended by feature pages                  |
+| **Role-based fixtures**          | `loginAs(role)`, `userPage`, `adminPage` — login lives in one place                                                   |
+| **Storage-state reuse**          | `setup-auth` Playwright project logs in once; downstream specs reuse the session                                      |
+| **Strict env layer**             | `config/env.ts` validates `.env` at startup — fails fast on missing variables                                         |
+| **Tag-driven suites**            | `@smoke`, `@regression`, `@critical`, `@negative`, `@validation`, `@rbac`                                             |
+| **Dual reporting**               | Playwright HTML + Allure, plus JUnit XML and JSON for CI tooling                                                      |
+| **CI-ready GitHub Actions**      | Separate workflows for smoke, sharded regression, and CodeQL security scanning                                        |
+| **Quality gates**                | TypeScript strict mode + Dependabot for automated dependency updates                                                  |
+| **Governance**                   | `LICENSE`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md`, issue & PR templates, `CODEOWNERS`                  |
 
 ---
 
 ## Tech Stack
 
-| Technology           | Purpose                        |
-|----------------------|--------------------------------|
-| Playwright           | E2E web automation             |
-| TypeScript           | Test code & type safety        |
-| Node.js              | Runtime                        |
-| Playwright Test      | Runner, projects, fixtures     |
-| Allure + HTML Report | Reporting                      |
-| dotenv               | `.env` for base URL & users    |
-| GitHub Actions       | CI/CD ready                    |
+| Layer            | Technology                              |
+| ---------------- | --------------------------------------- |
+| Runner           | [Playwright Test](https://playwright.dev) |
+| Language         | TypeScript (strict)                     |
+| Runtime          | Node.js ≥ 20                            |
+| Reporting        | Playwright HTML + Allure                |
+| Config           | `dotenv`                                |
+| CI               | GitHub Actions, CodeQL, Dependabot      |
 
 ---
 
-## Prerequisites
-
-- **Node.js** 18+
-- **npm** 9+
-- **Chrome** (Playwright uses `channel: 'chrome'`)
-
----
-
-## 📚 Documentation
-
-| Document | Description |
-|----------|-------------|
-| **[Quick Start Guide](docs/quick-start.md)** | Get started in 5 minutes with step-by-step setup |
-| **[Test Coverage](docs/test-coverage.md)** | Complete test case documentation with 15+ scenarios |
-| **[Architecture Overview](docs/architecture.md)** | Framework design, patterns, and best practices |
-| **[Setup Guide](docs/setup-guide.md)** | Detailed setup and configuration instructions |
-
----
-
-## 🚀 Getting Started
-
-### 1. Clone the repository
+## Quick Start
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/playwright-test-automation-framework.git
+# 1. Clone
+git clone https://github.com/aeshamangukiya/playwright-test-automation-framework.git
 cd playwright-test-automation-framework
-```
 
-### 2. Install dependencies
-
-```bash
+# 2. Install dependencies + browsers (requires Node 20+)
 npm install
-npx playwright install chromium
-```
+npx playwright install --with-deps chromium
 
-### 3. Environment setup
+# 3. Configure environment
+cp .env.example .env   # Windows: copy .env.example .env
 
-Copy `.env.example` to `.env` and adjust if needed. Defaults point to OrangeHRM demo:
-
-```env
-ENVIRONMENT=staging
-
-# Staging (OrangeHRM demo)
-STAGING_BASE_URL=https://opensource-demo.orangehrmlive.com
-STAGING_USER_USERNAME=Admin
-STAGING_USER_PASSWORD=admin123
-STAGING_ADMIN_USERNAME=Admin
-STAGING_ADMIN_PASSWORD=admin123
-
-# Production (your own instance)
-PRODUCTION_BASE_URL=https://your-orangehrm-instance.com
-PRODUCTION_USER_USERNAME=...
-PRODUCTION_USER_PASSWORD=...
-PRODUCTION_ADMIN_USERNAME=...
-PRODUCTION_ADMIN_PASSWORD=...
-```
-
-### 4. Run tests
-
-```bash
-# Run all tests
-npm test
-
-# Headed browser
-npm run test:headed
-
-# Specific spec
-npx playwright test specs/features/auth/login.spec.ts
-
-# Smoke or regression only
+# 4. Run smoke tests
 npm run test:smoke
-npm run test:regression
-
-# UI mode
-npx playwright test --ui
 ```
 
-### 5. View reports
-
-- **Playwright HTML:** `npx playwright show-report`
-- **Allure:** `npm run allure:report` (or `allure:generate` then `allure:open`)
+Full walkthrough → [docs/quick-start.md](docs/quick-start.md)
 
 ---
 
 ## Project Structure
 
-```
+```text
 playwright-test-automation-framework/
-├── playwright.config.ts     # Projects (prepare-auth, after-login, before-login), reporters, baseURL
-├── package.json             # Scripts & dependencies
-├── tsconfig.json
-├── .env                     # Not committed; copy from .env.example
-
+├── .github/
+│   ├── workflows/             # CI: smoke, regression, codeql
+│   ├── ISSUE_TEMPLATE/        # Bug + Feature templates
+│   ├── PULL_REQUEST_TEMPLATE.md
+│   ├── CODEOWNERS
+│   └── dependabot.yml
 ├── config/
-│   ├── env.ts               # ENV from .env (staging/production BASE_URL & users)
-│   ├── browser.ts           # Timeouts, browser options
-│   └── urls.ts              # App routes (LOGIN, DASHBOARD, PIM, LEAVE)
-
-├── specs/
-│   ├── setup/
-│   │   └── auth.setup.ts    # Login once, save storage state for after-login project
-│   └── features/
-│       ├── auth/
-│       │   └── login.spec.ts
-│       └── dashboard/
-│           └── dashboard.spec.ts
-
+│   ├── env.ts                 # Strict env loader (.env + ENVIRONMENT)
+│   ├── browser.ts             # Viewport + timeouts
+│   └── urls.ts                # Application route fragments
 ├── lib/
-│   ├── fixtures/
-│   │   └── index.ts         # test, loginAs(role), loginPage, dashboardPage (User/Admin)
-│   ├── pages/
-│   │   ├── base/
-│   │   │   └── BasePage.ts  # goto, click, stableFill, expectVisible
-│   │   ├── auth/
-│   │   │   └── LoginPage.ts
-│   │   └── dashboard/
-│   │       └── DashboardPage.ts
 │   ├── data/
-│   │   ├── users.ts         # User credentials (from ENV)
-│   │   └── constants/       # roles, messages, app-constants, ui-constants
-│   ├── helpers/
-│   │   └── AssertionHelper.ts
-│   └── utils/
-│       ├── Logger.ts
-│       └── Wait.ts
-
-├── storage/                 # user.auth.json (saved session)
-├── test-results/            # Screenshots, videos, traces
-├── playwright-report/
-└── allure-results/
+│   │   ├── users.ts           # ENV-driven user map
+│   │   └── constants/         # roles, messages, ui, app
+│   ├── fixtures/
+│   │   ├── base.fixture.ts    # page objects
+│   │   ├── auth.fixture.ts    # loginAs / userPage / adminPage
+│   │   └── index.ts           # mergeTests entry point
+│   ├── helpers/               # Cross-page business assertions
+│   ├── pages/
+│   │   ├── base/              # BasePage with stable primitives
+│   │   ├── auth/              # LoginPage
+│   │   └── dashboard/         # DashboardPage
+│   └── utils/                 # Logger, Wait, DataGenerator
+├── specs/
+│   ├── setup/                 # auth.setup.ts — persists storage state
+│   └── features/              # Business-readable specs (auth, dashboard, …)
+├── docs/                      # Quick Start, Architecture, Runbook, Troubleshooting…
+├── playwright.config.ts       # Projects, reporters, baseURL
+├── tsconfig.json              # Strict TS config with path aliases
+└── package.json
 ```
 
 ---
 
-## Test Projects (playwright.config.ts)
+## Test Projects
 
-| Project        | Purpose                               | Storage state    |
-|----------------|----------------------------------------|------------------|
-| `prepare-auth` | Runs `*.setup.ts`; logs in once        | Writes to storage |
-| `after-login`  | All other specs (use saved session)    | Uses storage      |
-| `before-login` | Login specs only (fresh session)       | None              |
+`playwright.config.ts` declares three Playwright projects with explicit dependencies:
+
+| Project           | Purpose                                          | Storage state               |
+| ----------------- | ------------------------------------------------ | --------------------------- |
+| `setup-auth`      | Runs `*.setup.ts` once — logs in and captures session | _writes_ `storage/auth/user.json` |
+| `authenticated`   | All non-login specs                              | _reads_ persisted session    |
+| `unauthenticated` | Login specs only                                 | fresh, isolated session      |
+
+Run a single project:
+
+```bash
+npx playwright test --project=setup-auth
+npx playwright test --project=authenticated
+npx playwright test --project=unauthenticated
+```
+
+Or just `npx playwright test` and Playwright resolves dependencies automatically.
 
 ---
 
-## 📝 Sample Tests
+## NPM Scripts
 
-### **Positive Login Test**
-
-**specs/features/auth/login.spec.ts**
-
-```ts
-import { test } from '../../../lib/fixtures';
-import { USER_ROLES } from '../../../lib/data/constants/roles';
-import { DashboardPage } from '../../../lib/pages/dashboard/DashboardPage';
-import { Logger } from '../../../lib/utils/Logger';
-
-test.describe('Login Tests - Positive Scenarios', () => {
-    test(
-        'USER-001: User can login successfully with valid credentials',
-        { tag: ['@smoke', '@regression', '@critical'] },
-        async ({ loginAs, page }, testInfo) => {
-            testInfo.annotations.push(
-                { type: 'severity', description: 'critical' },
-                { type: 'feature', description: 'Authentication' },
-                { type: 'story', description: 'USER-001: User Login' }
-            );
-
-            Logger.step('Step 1: Login as standard User role');
-            await loginAs(USER_ROLES.USER);
-
-            Logger.step('Step 2: Verify Dashboard is loaded successfully');
-            const dashboard = new DashboardPage(page);
-            await dashboard.verifyDashboardLoaded();
-
-            Logger.info('✅ User login successful - Dashboard accessible');
-        }
-    );
-});
-```
-
-### **Negative Login Test**
-
-```ts
-test.describe('Login Tests - Negative Scenarios', () => {
-    test(
-        'AUTH-101: Login fails with invalid username',
-        { tag: ['@regression', '@negative'] },
-        async ({ loginPage }, testInfo) => {
-            testInfo.annotations.push(
-                { type: 'severity', description: 'normal' },
-                { type: 'feature', description: 'Authentication' },
-                { type: 'story', description: 'AUTH-101: Invalid Username' }
-            );
-
-            Logger.step('Step 1: Navigate to login page');
-            await loginPage.openLoginPage();
-
-            Logger.step('Step 2: Attempt login with invalid username');
-            await loginPage.login('InvalidUser123', 'admin123');
-
-            Logger.step('Step 3: Verify error message is displayed');
-            await loginPage.verifyErrorMessage(MESSAGES.LOGIN_FAILED);
-
-            Logger.info('✅ Invalid username correctly rejected');
-        }
-    );
-});
-```
-
-### **Dashboard Test with Role Fixture**
-
-**specs/features/dashboard/dashboard.spec.ts**
-
-```ts
-test.describe('Dashboard Tests - Admin Role', () => {
-    test(
-        'DASH-101: Admin can access dashboard successfully',
-        { tag: ['@smoke', '@regression'] },
-        async ({ adminPage }, testInfo) => {
-            testInfo.annotations.push(
-                { type: 'severity', description: 'critical' },
-                { type: 'feature', description: 'Dashboard' }
-            );
-
-            Logger.step('Step 1: Verify Admin dashboard loads');
-            await adminPage.verifyDashboardLoaded();
-
-            Logger.info('✅ Admin dashboard accessible');
-        }
-    );
-});
-```
+| Script                       | What it does                                              |
+| ---------------------------- | --------------------------------------------------------- |
+| `npm test`                   | Run the entire suite                                      |
+| `npm run test:smoke`         | `@smoke` only — fast critical-path feedback               |
+| `npm run test:regression`    | `@regression` only — broader coverage                     |
+| `npm run test:critical`      | `@critical` business scenarios                            |
+| `npm run test:negative`      | Negative-path tests                                       |
+| `npm run test:rbac`          | Role-based access checks                                  |
+| `npm run test:headed`        | Headed browser                                            |
+| `npm run test:ui`            | Playwright UI mode                                        |
+| `npm run test:debug`         | Inspector mode                                            |
+| `npm run report`             | Open the last Playwright HTML report                      |
+| `npm run allure:report`      | Generate + open the Allure report                         |
+| `npm run typecheck`          | `tsc --noEmit` — validate TypeScript without emitting    |
+| `npm run clean`              | Remove generated artefacts (`test-results`, `allure-*`, …) |
 
 ---
 
-## NPM Scripts & Tagging Strategy
+## Tagging Strategy
 
-| Script                      | Description                              |
-|-----------------------------|------------------------------------------|
-| `npm test`                  | Run all Playwright tests                 |
-| `npm run test:smoke`        | Run tests tagged with `@smoke`           |
-| `npm run test:regression`   | Run tests tagged with `@regression`      |
-| `npm run test:headed`       | Run all tests in headed mode             |
-| `npm run smoke`             | Legacy alias for `npm run test:smoke`    |
-| `npm run regression`        | Legacy alias for `npm run test:regression` |
-| `npm run allure:generate`   | Generate Allure report                    |
-| `npm run allure:open`       | Open Allure report                        |
-| `npm run allure:report`     | Generate + open Allure                    |
-| `npm run clean:allure`      | Remove Allure results/report artifacts    |
+Every test carries at least one tag so suites can be sliced freely:
 
-**Tagging strategy:**
+| Tag           | Purpose                                                |
+| ------------- | ------------------------------------------------------ |
+| `@smoke`      | Fast, high-value checks — runs on every PR             |
+| `@regression` | Broader coverage — runs on `master` and nightly        |
+| `@critical`   | Business-critical scenarios                            |
+| `@negative`   | Negative-path / error-handling                         |
+| `@validation` | Form-validation scenarios                              |
+| `@rbac`       | Role-based access control                              |
 
-- `@smoke` – High-value, fast checks to validate core flows.
-- `@regression` – Broader coverage for regular regression runs.
-- `@critical` – Business-critical scenarios (e.g. happy path login).
+Combine via Playwright `--grep`:
 
-Tags are attached via the Playwright [`test` configuration](https://playwright.dev/docs/test-annotations) and can be combined for flexible selection.
+```bash
+npx playwright test --grep "@smoke|@critical"
+npx playwright test --grep-invert @negative
+```
 
 ---
 
 ## Role-Based Fixtures
 
-Role-based fixtures live in `lib/fixtures` and are used across specs and setup:
-
-- `loginAs(role)` – Logs in as `USER_ROLES.USER` or `USER_ROLES.ADMIN`.
-- `userPage` – Dashboard pre-logged in as a standard user.
-- `adminPage` – Dashboard pre-logged in as an admin.
-
-Example usage:
+Tests express **intent**, not low-level steps:
 
 ```ts
-import { test } from '../../../lib/fixtures';
-import { USER_ROLES } from '../../../lib/data/constants/roles';
+import { test } from '@lib/fixtures';
+import { USER_ROLES } from '@lib/data/constants/roles';
 
-test('User can login successfully', async ({ loginAs, page }) => {
+test('user can log in', async ({ loginAs, page }) => {
     await loginAs(USER_ROLES.USER);
     // assertions...
 });
 ```
 
-Behind the scenes, credentials are read from `.env` through `config/env.ts` and `lib/data/users.ts`, ensuring no direct `process.env` access in tests or pages.
+Available fixtures:
+
+- `loginPage`, `dashboardPage` — ready-to-use page objects
+- `loginAs(role)` — programmatic login for any `USER_ROLES.*`
+- `userPage`, `adminPage` — `DashboardPage` pre-authenticated as that role
+
+Credentials are sourced from `.env` via `config/env.ts` → `lib/data/users.ts`.
+**Specs never touch `process.env` directly.**
 
 ---
 
-## Naming Conventions
+## Sample Tests
 
-| Component      | Convention | Example                           |
-|----------------|------------|-----------------------------------|
-| Folders        | kebab-case | `specs/features`, `lib/pages`     |
-| Page classes   | PascalCase | `LoginPage.ts`, `DashboardPage.ts`|
-| Methods / vars | camelCase  | `verifyDashboardLoaded()`, `loginAs` |
-| Spec files     | kebab-case | `login.spec.ts`, `dashboard.spec.ts` |
+### ✅ Positive — happy path
 
----
-
-## Reporting & Artifacts
-
-- **Playwright HTML report** — `playwright-report/` (open with `npx playwright show-report`)
-- **Allure** — `allure-results/` → generate → `allure-report/`
-- **On failure** — Screenshots, video, trace in `test-results/`
-
----
-
-## 🚀 CI/CD - GitHub Actions
-
-The framework includes a **production-ready GitHub Actions workflow** with advanced features:
-
-### **Pipeline Features**
-- ✅ **Multi-job execution**: Smoke tests (fast feedback) + Regression tests (full coverage)
-- ✅ **Test sharding**: Parallel execution across 2 runners for faster completion
-- ✅ **Conditional execution**: Smart triggers based on event type (push/PR/manual)
-- ✅ **Manual dispatch**: Run specific test suites on-demand via workflow_dispatch
-- ✅ **Combined reporting**: Aggregates Allure results from all shards
-- ✅ **Artifact management**: Separate retention policies for different report types
-- ✅ **Test summary**: Auto-generated summary in GitHub Actions UI
-
-### **Workflow Jobs**
-
-1. **Smoke Tests** (15 min timeout)
-   - Triggers: Pull requests or manual smoke selection
-   - Runs: `npm run test:smoke`
-   - Purpose: Fast validation of critical paths
-
-2. **Regression Tests** (60 min timeout)
-   - Triggers: Push to main/master or manual regression selection  
-   - Runs: Tests split across 2 parallel shards
-   - Purpose: Full test coverage with optimized execution time
-
-3. **Generate Report**
-   - Combines Allure results from all jobs
-   - Creates unified test report
-   - Retention: 30 days
-
-4. **Test Summary**
-   - Displays execution status in GitHub Actions summary
-   - Shows pass/fail for each job
-   - Lists available artifacts
-
-### **Running in CI**
-
-The workflow automatically runs on:
-```yaml
-# Auto-triggers
-- Push to: main, master, develop branches
-- Pull requests to: main, master branches
-
-# Manual trigger (Actions tab)
-- Workflow dispatch with options: all, smoke, regression
+```ts
+test(
+    'USER-001: User logs in with valid credentials',
+    { tag: ['@smoke', '@regression', '@critical'] },
+    async ({ loginAs, page }) => {
+        await loginAs(USER_ROLES.USER);
+        const dashboard = new DashboardPage(page);
+        await dashboard.verifyDashboardLoaded();
+    },
+);
 ```
 
-### **Environment Variables**
+### ❌ Negative — invalid credentials
 
-Set these as GitHub repository secrets for production:
-```bash
-ENVIRONMENT=staging
-STAGING_BASE_URL=<your-url>
-STAGING_USER_USERNAME=<user>
-STAGING_USER_PASSWORD=<password>
-STAGING_ADMIN_USERNAME=<admin>
-STAGING_ADMIN_PASSWORD=<password>
+```ts
+test(
+    'AUTH-101: Login fails with invalid username',
+    { tag: ['@regression', '@negative'] },
+    async ({ loginPage }) => {
+        await loginPage.openLoginPage();
+        await loginPage.login('InvalidUser', 'admin123');
+        await loginPage.verifyErrorMessage(MESSAGES.LOGIN_FAILED);
+    },
+);
 ```
 
-For the OrangeHRM demo, no secrets are needed - the workflow uses default demo credentials from `.env` file.
+### 🛡️ Role-based — admin dashboard
 
-### **Viewing Reports**
-
-After workflow completion:
-1. Go to **Actions** tab
-2. Click on the workflow run
-3. Download artifacts:
-   - `playwright-report-smoke` - Smoke test HTML report
-   - `playwright-report-regression-shard-*` - Regression HTML reports
-   - `allure-report-combined` - Combined Allure report
-   - `test-results-shard-*` - Screenshots, videos, traces
-
----
-
-## License
-
-ISC
+```ts
+test(
+    'DASH-101: Admin can access dashboard',
+    { tag: ['@smoke', '@regression'] },
+    async ({ adminPage }) => {
+        await adminPage.verifyDashboardLoaded();
+    },
+);
+```
 
 ---
 
+## Reporting
+
+| Tool            | Location               | Open it with                              |
+| --------------- | ---------------------- | ----------------------------------------- |
+| Playwright HTML | `playwright-report/`   | `npm run report` (or `npx playwright show-report`) |
+| Allure          | `allure-results/`      | `npm run allure:report`                   |
+| JUnit XML       | `test-results/results.xml` | Consumed by CI dashboards             |
+| JSON            | `test-results/results.json` | Used by the regression workflow summary |
+
+On failure, Playwright also stores screenshots, videos, and traces under
+`test-results/`. Drop the trace into [trace.playwright.dev](https://trace.playwright.dev)
+for a step-by-step viewer.
+
+---
+
+## Continuous Integration
+
+GitHub Actions workflows live under [`.github/workflows/`](.github/workflows):
+
+| Workflow            | Trigger                                                                  | Purpose                                   |
+| ------------------- | ------------------------------------------------------------------------ | ----------------------------------------- |
+| **`smoke.yml`**     | PR / manual                                                              | Fast `@smoke` validation                   |
+| **`regression.yml`**| push to `master` / nightly cron / manual                                 | `@regression`, sharded ×2, combined Allure |
+| **`codeql.yml`**    | push / PR / weekly cron                                                  | Static security analysis                   |
+
+CI features include browser caching, retries, sharding, combined Allure
+reporting, and a Markdown step summary. Configure secrets under
+**Settings → Secrets and variables → Actions** when targeting a private
+environment; demo defaults are used otherwise.
+
+---
+
+## Documentation
+
+| Doc                                       | When to read it                              |
+| ----------------------------------------- | -------------------------------------------- |
+| [Quick Start](docs/quick-start.md)        | First time on the project                    |
+| [Setup Guide](docs/setup-guide.md)        | Detailed environment configuration           |
+| [Architecture](docs/architecture.md)      | Understanding how the layers fit together    |
+| [Test Coverage](docs/test-coverage.md)    | What is tested, which tags map to which IDs  |
+| [Runbook](docs/runbook.md)                | Picking the right command for a scenario     |
+| [Troubleshooting](docs/troubleshooting.md)| A test failed or the suite won't start       |
+| [CHANGELOG](CHANGELOG.md)                 | Release notes                                |
+
+---
 
 ## Contributing
 
-1. Fork the repo  
-2. Create a branch (`git checkout -b feature/your-feature`)  
-3. Commit (`git commit -m 'Add some feature'`)  
-4. Push (`git push origin feature/your-feature`)  
-5. Open a Pull Request  
+We welcome issues, ideas, and pull requests! Read
+[`CONTRIBUTING.md`](CONTRIBUTING.md) for the development workflow, coding
+standards, and Conventional Commits convention. By participating you agree to
+the [Code of Conduct](CODE_OF_CONDUCT.md).
 
 ---
 
-## 📋 Version History
+## Security
 
-See **[CHANGELOG.md](CHANGELOG.md)** for detailed release notes and version history.
-
-**Current Version**: 1.0.0 (Production Ready)
-
----
-
-## 📚 Additional Resources
-
-- **[Playwright Documentation](https://playwright.dev)** - Official Playwright docs
-- **[OrangeHRM Demo](https://opensource-demo.orangehrmlive.com)** - Live demo application
-- **[TypeScript Handbook](https://www.typescriptlang.org/docs/)** - TypeScript reference
-- **[Allure Reports](https://docs.qameta.io/allure/)** - Allure reporting docs
+Please report vulnerabilities privately via
+[GitHub Security Advisories](https://github.com/aeshamangukiya/playwright-test-automation-framework/security/advisories/new).
+Full disclosure policy in [`SECURITY.md`](SECURITY.md).
 
 ---
 
 ## License
 
-ISC
+Released under the [MIT License](LICENSE).
 
----
+> The OrangeHRM trademark and its open-source demo are property of their
+> respective owners. This repository is an independent test automation
+> reference and is not affiliated with or endorsed by OrangeHRM Inc.
 
-*OrangeHRM demo: [opensource-demo.orangehrmlive.com](https://opensource-demo.orangehrmlive.com)*
-
-**Made with ❤️ for the testing community** 🎭
-
+<p align="center"><sub>Built with ❤️ for the QA engineering community.</sub></p>

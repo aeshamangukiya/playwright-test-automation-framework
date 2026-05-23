@@ -1,89 +1,69 @@
-import { defineConfig } from '@playwright/test';
+import { defineConfig, devices } from '@playwright/test';
 import { ENV } from './config/env';
 import { BROWSER_CONFIG } from './config/browser';
 import { APP_CONSTANTS } from './lib/data/constants/app-constants';
 
+const isCI = ENV.IS_CI;
+
 export default defineConfig({
-  testDir: './specs',
-  timeout: BROWSER_CONFIG.TIMEOUTS.TEST,
-  retries: 0,
+    testDir: './specs',
+    timeout: BROWSER_CONFIG.TIMEOUTS.TEST,
+    expect: { timeout: BROWSER_CONFIG.TIMEOUTS.EXPECT },
+    fullyParallel: true,
 
-  reporter: [
-    ['list'],
-    [
-      'html',
-      {
-        open: 'never',
-      },
+    forbidOnly: isCI,
+    retries: isCI ? 1 : 0,
+    workers: isCI ? 3 : undefined,
+
+    outputDir: 'test-results',
+
+    reporter: [
+        ['list'],
+        ['html', { outputFolder: 'playwright-report', open: isCI ? 'never' : 'on-failure' }],
+        ['allure-playwright', { outputFolder: 'allure-results', detail: true, suiteTitle: true }],
+        ['junit', { outputFile: 'test-results/results.xml' }],
+        ['json', { outputFile: 'test-results/results.json' }],
     ],
-    [
-      'allure-playwright',
-      {
-        outputFolder: 'allure-results',
-        detail: true,
-        suiteTitle: true,
-        // open: false, // optional, prevents Allure from opening automatically
-      },
+
+    use: {
+        ...devices['Desktop Chrome'],
+        baseURL: ENV.BASE_URL,
+        headless: isCI,
+        viewport: BROWSER_CONFIG.VIEWPORT.DESKTOP,
+        actionTimeout: BROWSER_CONFIG.TIMEOUTS.ACTION,
+        navigationTimeout: BROWSER_CONFIG.TIMEOUTS.NAVIGATION,
+        screenshot: 'only-on-failure',
+        video: 'retain-on-failure',
+        trace: 'retain-on-failure',
+    },
+
+    projects: [
+        // 1) Authentication setup — runs once, captures storage state.
+        {
+            name: 'setup-auth',
+            testMatch: /.*\.setup\.ts/,
+            use: { ...devices['Desktop Chrome'] },
+        },
+
+        // 2) Standard authenticated specs — reuse storage state.
+        {
+            name: 'authenticated',
+            dependencies: ['setup-auth'],
+            testIgnore: [/.*\.setup\.ts/, /.*login\.spec\.ts/],
+            use: {
+                ...devices['Desktop Chrome'],
+                storageState: APP_CONSTANTS.STORAGE_PATH,
+            },
+        },
+
+        // 3) Login specs — fresh session, no persisted storage.
+        {
+            name: 'unauthenticated',
+            testMatch: /.*login\.spec\.ts/,
+            use: {
+                ...devices['Desktop Chrome'],
+                storageState: undefined,
+            },
+        },
     ],
-  ],
-
-  use: {
-    headless: process.env.CI === 'true',
-    actionTimeout: BROWSER_CONFIG.TIMEOUTS.ACTION,
-    navigationTimeout: BROWSER_CONFIG.TIMEOUTS.NAVIGATION,
-    screenshot: 'only-on-failure',
-    video: 'retain-on-failure',
-    trace: 'retain-on-failure',
-    baseURL: ENV.BASE_URL,
-  },
-
-  projects: [
-    // PREPARE-AUTH PROJECT (LOGIN ONCE)
-    {
-      name: 'prepare-auth',
-      testMatch: /.*\.setup\.ts/,
-      use: {
-        browserName: 'chromium',
-        channel: 'chrome',
-        launchOptions:
-          process.env.CI === 'true'
-            ? {
-              args: ['--no-sandbox', '--disable-setuid-sandbox'],
-            }
-            : {},
-      },
-    },
-
-    // AFTER-LOGIN PROJECT (REUSE LOGIN)
-    {
-      name: 'after-login',
-      dependencies: ['prepare-auth'],
-      testIgnore: /.*login\.spec\.ts/, // Exclude login tests
-      use: {
-        browserName: 'chromium',
-        channel: 'chrome',
-        storageState: APP_CONSTANTS.STORAGE_PATH,
-
-        launchOptions:
-          process.env.CI === 'true'
-            ? {
-              args: ['--no-sandbox', '--disable-setuid-sandbox'],
-            }
-            : {},
-      },
-    },
-
-    // BEFORE-LOGIN PROJECT (LOGIN TESTS)
-    {
-      name: 'before-login',
-      dependencies: ['prepare-auth'], // Optional dependency if independent
-      testMatch: /.*login\.spec\.ts/,
-      use: {
-        browserName: 'chromium',
-        channel: 'chrome',
-        storageState: undefined, // Ensure fresh session
-      },
-    },
-  ],
 });
-

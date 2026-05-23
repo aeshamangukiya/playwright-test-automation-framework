@@ -1,0 +1,22 @@
+# Force LF line endings for source files across all platforms
+* text=auto eol=lf
+
+*.ts        text eol=lf
+*.tsx       text eol=lf
+*.js        text eol=lf
+*.cjs       text eol=lf
+*.mjs       text eol=lf
+*.json      text eol=lf
+*.yml       text eol=lf
+*.yaml      text eol=lf
+*.md        text eol=lf
+*.sh        text eol=lf
+
+# Treat binary assets as binary
+*.png       binary
+*.jpg       binary
+*.jpeg      binary
+*.gif       binary
+*.ico       binary
+*.pdf       binary
+*.zip       binary

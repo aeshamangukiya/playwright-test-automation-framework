@@ -1,277 +1,137 @@
-## Setup Guide
+# 🛠️ Setup Guide
 
-This guide walks through **local setup**, **environment configuration**, and **how to run tests** in this Playwright framework.
-
----
-
-## 1. Prerequisites
-
-- **Node.js** 18+  
-- **npm** 9+  
-- **Git** (for cloning the repository)  
-- **Chrome** browser (tests use `channel: 'chrome'`)
-
-Verify Node and npm:
-
-```bash
-node -v
-npm -v
-```
+This guide is for engineers configuring the framework on a fresh machine or
+adapting it to a different target environment. For a five-minute onboarding,
+see [Quick Start](quick-start.md).
 
 ---
 
-## 2. Clone the Repository
+## 1. System prerequisites
+
+| Tool       | Version  | Notes                                                            |
+| ---------- | -------- | ---------------------------------------------------------------- |
+| Node.js    | ≥ 20.x   | Required runtime; enforced via `engines` in `package.json`.      |
+| npm        | ≥ 9.x    | Bundled with Node 20.                                            |
+| Git        | latest   | Required to clone and for CI integration.                        |
+| Java JRE   | ≥ 8      | Only required to render Allure reports locally.                  |
+| Chromium   | latest   | Auto-installed via `npx playwright install`.                     |
+
+> Windows users: PowerShell is supported. The repo ships `.gitattributes`
+> enforcing LF line endings to avoid cross-OS diff noise.
+
+---
+
+## 2. Install
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/playwright-test-automation-framework.git
+git clone https://github.com/aeshamangukiya/playwright-test-automation-framework.git
 cd playwright-test-automation-framework
-```
-
-Replace `YOUR_USERNAME` with your GitHub handle when you publish the project.
-
----
-
-## 3. Install Dependencies
-
-```bash
 npm install
-npx playwright install chromium
-```
-
-For CI (Linux containers), you may prefer:
-
-```bash
 npx playwright install --with-deps chromium
 ```
 
+`npm install` installs `node_modules` based on `package-lock.json`. The
+follow-up `npx playwright install` downloads the Chromium binary plus any
+required OS dependencies (`--with-deps` is recommended on Linux runners).
+
 ---
 
-## 4. Environment Configuration (`.env`)
+## 3. Configure `.env`
 
-### 4.1 Create `.env` from template
+The framework refuses to start if any required variable is missing — this is
+intentional and prevents silent misconfiguration.
 
-An example file is provided:
-
-```bash
-cp .env.example .env
-```
-
-On Windows PowerShell:
-
-```powershell
-Copy-Item .env.example .env
-```
-
-### 4.2 `.env` variables
-
-The framework supports **staging** and **production** profiles out of the box:
+### 3.1 Choose the active environment
 
 ```env
-ENVIRONMENT=staging
+ENVIRONMENT=staging      # or `production`
+```
 
-# Staging (OrangeHRM demo)
+### 3.2 Provide values for the active environment
+
+Every variable must be prefixed with `STAGING_` or `PRODUCTION_`:
+
+```env
 STAGING_BASE_URL=https://opensource-demo.orangehrmlive.com
 STAGING_USER_USERNAME=Admin
 STAGING_USER_PASSWORD=admin123
 STAGING_ADMIN_USERNAME=Admin
 STAGING_ADMIN_PASSWORD=admin123
 
-# Production (your own instance)
-PRODUCTION_BASE_URL=https://your-orangehrm-instance.com
-PRODUCTION_USER_USERNAME=...
-PRODUCTION_USER_PASSWORD=...
-PRODUCTION_ADMIN_USERNAME=...
-PRODUCTION_ADMIN_PASSWORD=...
+PRODUCTION_BASE_URL=https://your-own-instance.example.com
+PRODUCTION_USER_USERNAME=…
+PRODUCTION_USER_PASSWORD=…
+PRODUCTION_ADMIN_USERNAME=…
+PRODUCTION_ADMIN_PASSWORD=…
 ```
 
-Notes:
+> ⚠️ `.env` is git-ignored and **must not be committed**. Use GitHub Actions
+> secrets for CI — see [§ 6 CI/CD secrets](#6-cicd-secrets).
 
-- `ENVIRONMENT` controls which profile is used at runtime (`staging` or `production`).
-- All values are accessed via `config/env.ts`; tests and pages **never** access `process.env` directly.
+### 3.3 Optional runtime flags
+
+| Variable | Effect                                                                |
+| -------- | --------------------------------------------------------------------- |
+| `CI`     | Set automatically in CI; switches reporters to non-interactive output |
+| `DEBUG`  | Enables verbose `Logger.debug` output during local runs               |
 
 ---
 
-## 5. Running Tests
-
-All commands are defined in `package.json` scripts for a consistent developer experience.
-
-### 5.1 Full test run
+## 4. Verify your setup
 
 ```bash
-npm test
+npm run typecheck    # TypeScript compiles cleanly
+npm run test:smoke   # quick functional sanity check
 ```
 
-Equivalent to:
-
-```bash
-npx playwright test
-```
-
-### 5.2 Tagged test runs
-
-Tags:
-
-- `@smoke` – Fast, high-value checks.
-- `@regression` – Broader coverage.
-- `@critical` – Business-critical scenarios.
-
-Scripts:
-
-```bash
-# Smoke tests
-npm run test:smoke
-
-# Regression tests
-npm run test:regression
-```
-
-`test:smoke` and `test:regression` automatically:
-
-- Clean previous Allure artifacts.
-- Run Playwright tests filtered by tag.
-
-(Legacy aliases `npm run smoke` and `npm run regression` are kept for backwards compatibility.)
-
-### 5.3 Headed / interactive runs
-
-```bash
-# Run all tests headed
-npm run test:headed
-
-# UI mode (exploratory)
-npx playwright test --ui
-```
-
-### 5.4 Running a single spec
-
-```bash
-npx playwright test specs/features/auth/login.spec.ts
-npx playwright test specs/features/dashboard/dashboard.spec.ts
-```
+Both should complete green. If they don't, see [Troubleshooting](troubleshooting.md).
 
 ---
 
-## 6. Role-Based Fixtures
+## 5. Pointing the framework at a different application
 
-The framework exposes **role-aware fixtures** from `lib/fixtures`:
+Swapping the target application is a four-step process:
 
-- `loginAs(role)` – Logs in as `USER_ROLES.USER` or `USER_ROLES.ADMIN`.
-- `userPage` – Dashboard page pre-logged in as regular user.
-- `adminPage` – Dashboard page pre-logged in as admin.
+| Step | File                                       | Action                                              |
+| ---- | ------------------------------------------ | --------------------------------------------------- |
+| 1    | `.env` / `.env.example`                    | Update `*_BASE_URL` and credential variables        |
+| 2    | `config/urls.ts`                           | Replace route fragments (`LOGIN`, `DASHBOARD`, …)   |
+| 3    | `lib/pages/**`                             | Update locators / extend page objects               |
+| 4    | `specs/**`                                 | Update spec wording, tags, and test IDs             |
 
-Example:
-
-```ts
-import { test } from '../../../lib/fixtures';
-import { USER_ROLES } from '../../../lib/data/constants/roles';
-
-test('User can login successfully', async ({ loginAs, page }) => {
-    await loginAs(USER_ROLES.USER);
-    // ... assertions using page / DashboardPage
-});
-```
-
-This keeps **authentication logic in one place** and allows tests to focus on behaviour.
+You shouldn't need to touch `playwright.config.ts` or the fixtures layer unless
+you add new roles or projects.
 
 ---
 
-## 7. Storage State & Projects
+## 6. CI/CD secrets
 
-The `playwright.config.ts` file defines three projects:
+For private targets, configure these GitHub Actions secrets under
+**Settings → Secrets and variables → Actions**:
 
-- **`prepare-auth`**
-  - Runs `specs/setup/auth.setup.ts`.
-  - Logs in once and saves storage state (`storage/user.auth.json`).
+| Secret                       | Notes                                                           |
+| ---------------------------- | --------------------------------------------------------------- |
+| `STAGING_BASE_URL`           | Optional — defaults to the public OrangeHRM demo                |
+| `STAGING_USER_USERNAME`      | Optional — defaults to `Admin`                                  |
+| `STAGING_USER_PASSWORD`      | Optional — defaults to `admin123`                               |
+| `STAGING_ADMIN_USERNAME`     | Optional — defaults to `Admin`                                  |
+| `STAGING_ADMIN_PASSWORD`     | Optional — defaults to `admin123`                               |
 
-- **`after-login`**
-  - Depends on `prepare-auth`.
-  - Uses the saved storage state for faster, authenticated runs.
-
-- **`before-login`**
-  - Focused on login scenarios.
-  - Starts from a clean, unauthenticated state.
-
-You typically just run `npm test` and let these projects orchestrate themselves.
+All workflows fall back to the demo defaults when secrets are absent, so the
+project works out-of-the-box on forks.
 
 ---
 
-## 8. Reports & Artifacts
+## 7. IDE recommendations
 
-### 8.1 Playwright HTML report
-
-```bash
-npx playwright show-report
-```
-
-Artifacts are stored under:
-
-- `playwright-report/`
-- `test-results/` (screenshots, videos, traces)
-
-### 8.2 Allure report
-
-```bash
-# Generate
-npm run allure:generate
-
-# Open
-npm run allure:open
-
-# Generate + open
-npm run allure:report
-```
-
-Allure artifacts:
-
-- Raw results: `allure-results/`
-- Generated report: `allure-report/`
+For the smoothest experience in VS Code, install the
+[Playwright Test for VS Code](https://marketplace.visualstudio.com/items?itemName=ms-playwright.playwright)
+extension. It lets you run, debug, and pick locators directly inside the editor.
 
 ---
 
-## 9. CI/CD Notes
+## 8. Next
 
-In CI (e.g. GitHub Actions):
-
-- Set `.env` values via secrets or environment variables.
-- Ensure browsers are installed:
-
-```bash
-npx playwright install --with-deps chromium
-```
-
-Run the tests:
-
-```bash
-npm test
-```
-
-Minimal GitHub Actions step:
-
-```yaml
-- name: Run Playwright tests
-  run: npm test
-  env:
-    ENVIRONMENT: staging
-    STAGING_BASE_URL: ${{ secrets.STAGING_BASE_URL }}
-    STAGING_USER_USERNAME: ${{ secrets.STAGING_USER_USERNAME }}
-    STAGING_USER_PASSWORD: ${{ secrets.STAGING_USER_PASSWORD }}
-    STAGING_ADMIN_USERNAME: ${{ secrets.STAGING_ADMIN_USERNAME }}
-    STAGING_ADMIN_PASSWORD: ${{ secrets.STAGING_ADMIN_PASSWORD }}
-```
-
----
-
-## 10. Troubleshooting
-
-- **Tests cannot reach the app**
-  - Check `ENVIRONMENT` and `*_BASE_URL` values in `.env`.
-  - Verify the app is reachable from your machine/CI agent.
-
-- **Login failures**
-  - Confirm user credentials in `.env` match those configured in the target environment.
-  - Check that the login form selectors in `LoginPage` still match the UI.
-
-- **Slow tests**
-  - Review `BROWSER_CONFIG.TIMEOUTS` and `Wait` usage.
-  - Avoid adding hard sleeps; prefer `Wait` helpers or `BasePage` methods.
-
+- [Architecture](architecture.md) — how the layers fit together
+- [Runbook](runbook.md) — pick the right command for the scenario
+- [Test Coverage](test-coverage.md) — which tests exist and why

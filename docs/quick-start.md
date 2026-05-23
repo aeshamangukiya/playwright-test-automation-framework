@@ -1,60 +1,58 @@
-# 🚀 Quick Start Guide
+# ⚡ Quick Start
 
-## Getting Started in 5 Minutes
+Get up and running in **under five minutes** against the OrangeHRM open-source demo.
 
-This quick start guide will help you get the Playwright Test Automation Framework up and running in minutes.
-
----
-
-## Prerequisites Checklist
-
-Before you begin, ensure you have:
-
-- ✅ **Node.js 18+** - [Download](https://nodejs.org/)
-- ✅ **npm 9+** - Comes with Node.js
-- ✅ **Git** - [Download](https://git-scm.com/)
-- ✅ **Chrome browser** - [Download](https://www.google.com/chrome/)
+> 💡 If you need deeper environment configuration, jump to the [Setup Guide](setup-guide.md).
 
 ---
 
-## Step-by-Step Setup
+## Prerequisites
 
-### 1️⃣ Clone the Repository
+| Requirement | Why                                                           |
+| ----------- | ------------------------------------------------------------- |
+| Node.js 20+ | Runtime                                                       |
+| npm 9+      | Bundled with Node 20                                          |
+| Git         | Cloning the repo                                              |
+| Chromium    | Auto-installed by `npx playwright install`                    |
+
+---
+
+## Step-by-step
+
+### 1. Clone the repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/playwright-test-automation-framework.git
+git clone https://github.com/aeshamangukiya/playwright-test-automation-framework.git
 cd playwright-test-automation-framework
 ```
 
-### 2️⃣ Install Dependencies
+### 2. Install Node.js 20+
+
+Install from <https://nodejs.org> if you don't already have it. Verify:
 
 ```bash
-# Install Node modules
-npm install
-
-# Install Playwright browsers
-npx playwright install chromium
+node -v        # should print v20.x or higher
 ```
 
-**Expected time**: ~2-3 minutes
-
----
-
-### 3️⃣ Configure Environment
-
-The project ships with a working `.env` file for the OrangeHRM demo. No changes needed!
-
-**Optional**: To customize, copy `.env.example` to `.env`:
+### 3. Install dependencies
 
 ```bash
-# On Windows
+npm install
+npx playwright install --with-deps chromium
+```
+
+### 4. Configure environment
+
+```bash
+# Windows
 copy .env.example .env
 
-# On Linux/Mac
+# macOS / Linux
 cp .env.example .env
 ```
 
-The default configuration:
+Defaults already point to the public OrangeHRM demo:
+
 ```env
 ENVIRONMENT=staging
 STAGING_BASE_URL=https://opensource-demo.orangehrmlive.com
@@ -64,217 +62,90 @@ STAGING_ADMIN_USERNAME=Admin
 STAGING_ADMIN_PASSWORD=admin123
 ```
 
----
-
-### 4️⃣ Run Your First Test
-
-#### Option A: Quick Smoke Test (Recommended)
+### 5. Run your first tests
 
 ```bash
+# Fast feedback — ~2-3 min
 npm run test:smoke
-```
 
-**What it does**:
-- Runs 8 critical tests
-- Takes ~2-3 minutes
-- Validates core authentication and dashboard functionality
-
-#### Option B: Full Test Suite
-
-```bash
+# Full suite — ~8-10 min
 npm test
+
+# Watch tests run in Playwright's UI
+npm run test:ui
 ```
 
-**What it does**:
-- Runs all 20 tests (15 tests + 5 setup tests)
-- Takes ~8-10 minutes
-- Comprehensive coverage
-
-#### Option C: Watch Tests in UI Mode
+### 6. View the report
 
 ```bash
-npx playwright test --ui
-```
-
-**What it does**:
-- Opens interactive Playwright UI
-- Watch tests execute step-by-step
-- Great for learning and debugging
-
----
-
-### 5️⃣ View Test Results
-
-After tests complete, view the reports:
-
-#### Playwright HTML Report
-
-```bash
-npx playwright show-report
-```
-
-#### Allure Report
-
-```bash
-npm run allure:report
+npm run report             # Playwright HTML
+npm run allure:report      # Allure (generate + open)
 ```
 
 ---
 
-## 🎯 Common Test Commands
-
-### Run Specific Test Suites
+## Common commands
 
 ```bash
-# Critical tests only
+# Tag-based suites
 npx playwright test --grep @critical
-
-# All regression tests
-npm run test:regression
-
-# Negative test scenarios
 npx playwright test --grep @negative
-
-# Validation tests
 npx playwright test --grep @validation
-
-# RBAC tests
 npx playwright test --grep @rbac
-```
 
-### Run Specific Test Files
-
-```bash
-# Login tests only
+# Single spec
 npx playwright test specs/features/auth/login.spec.ts
 
-# Dashboard tests only
-npx playwright test specs/features/dashboard/dashboard.spec.ts  
-```
+# Specific Playwright project
+npx playwright test --project=authenticated
 
-### Run in Different Modes
-
-```bash
-# Headed mode (see the browser)
+# Headed / debug
 npm run test:headed
-
-# Debug mode (step through tests)
-npx playwright test --debug
-
-# Specific browser
-npx playwright test --project=chromium
+npm run test:debug
 ```
+
+Full command catalogue → [docs/runbook.md](runbook.md).
 
 ---
 
-## 📊 Understanding Test Output
+## Project layout (at a glance)
 
-### Console Logs
-
-Tests use a custom Logger with colored output:
-
+```text
+config/        env loader, viewport/timeouts, route constants
+lib/
+  data/        users + constants (roles, messages, ui, app)
+  fixtures/    base + auth fixtures (loginAs, userPage, adminPage)
+  helpers/     business-level assertions
+  pages/       Page Objects (Base, Login, Dashboard)
+  utils/       Logger, Wait, DataGenerator
+specs/
+  setup/       auth.setup.ts — captures storage state once
+  features/    business-readable specs (auth, dashboard, …)
 ```
-[2026-02-17T12:42:20.841Z] [STEP] Step 1: Navigate to login page
-[2026-02-17T12:42:25.632Z] [STEP] Step 2: Attempt login with invalid username
-[2026-02-17T12:42:28.684Z] [STEP] Step 3: Verify error message is displayed
-[2026-02-17T12:42:28.841Z] [SUCCESS] ✅ Invalid username correctly rejected
-```
 
-### Test Results
-
-```
-Passed:  15 tests (including 5 setup tests)
-Failed:  0 tests
-Skipped: 0 tests
-```
+Deep dive → [docs/architecture.md](architecture.md).
 
 ---
 
-## 🔧 Troubleshooting
+## Troubleshooting
 
-### Issue: Tests fail with "browser not found"
+| Symptom                                         | Fix                                                                |
+| ----------------------------------------------- | ------------------------------------------------------------------ |
+| `browser not found` / `Failed to launch`        | `npx playwright install --with-deps chromium`                      |
+| `Missing required environment variable: …`      | Copy `.env.example` to `.env` and fill in the value                |
+| Tests time out connecting to OrangeHRM          | Verify you have internet access; the demo target is hosted publicly |
+| Allure CLI says `Java not found`                | Install Java 8+ (Allure requires a JRE)                            |
 
-**Solution**:
-```bash
-npx playwright install chromium --with-deps
-```
-
-### Issue: Tests timeout
-
-**Solution**: Check your internet connection. The demo site requires internet access.
-
-### Issue: `.env` file not found
-
-**Solution**:
-```bash
-copy .env.example .env
-```
-
-### Issue: Port already in use (for UI mode)
-
-**Solution**: Close any existing Playwright UI sessions or use a different port
+More detail in [docs/troubleshooting.md](troubleshooting.md).
 
 ---
 
-## 📁 Project Structure Quick Reference
+## Next steps
 
-```
-playwright-test-automation-framework/
-├── specs/                      # Test files
-│   ├── features/
-│   │   ├── auth/              # Login tests
-│   │   └── dashboard/         # Dashboard tests
-│   └── setup/                 # Authentication setup
-│
-├── lib/                       # Framework code
-│   ├── pages/                 # Page Objects
-│   ├── fixtures/              # Test fixtures
-│   ├── data/                  # Test data & constants
-│   ├── helpers/               # Assertion helpers
-│   └── utils/                 # Utilities (Logger, Wait)
-│
-├── config/                    # Configuration
-│   ├── env.ts                 # Environment config
-│   ├── browser.ts             # Browser settings
-│   └── urls.ts                # Application URLs
-│
-├── docs/                      # Documentation
-├── .github/workflows/         # CI/CD pipelines
-└── playwright.config.ts       # Playwright config
-```
+1. **Explore a real spec** — open [`specs/features/auth/login.spec.ts`](../specs/features/auth/login.spec.ts).
+2. **Learn the architecture** — [docs/architecture.md](architecture.md).
+3. **Understand test coverage** — [docs/test-coverage.md](test-coverage.md).
+4. **Add your first test** — see [CONTRIBUTING → Adding New Tests](../CONTRIBUTING.md#adding-new-tests).
+5. **Push and watch CI** — open a PR to trigger the smoke workflow.
 
----
-
-## 🎓 Next Steps
-
-Now that you're up and running:
-
-1. **Explore Test Files**: Look at `specs/features/auth/login.spec.ts` to understand test structure
-2. **Read Documentation**: 
-   - [Architecture docs](docs/architecture.md)
-   - [Test Coverage](docs/test-coverage.md)
-3. **Run in CI**: Push to GitHub to trigger the CI/CD pipeline
-4. **Customize**: Add your own tests and page objects
-5. **Read the README**: Full documentation in [README.md](../README.md)
-
----
-
-## 💡 Quick Tips
-
-- **Run tests often**: Use `npm run test:smoke` for quick feedback
-- **Use UI mode**: Great for development with `npx playwright test --ui`
-- **Check logs**: Tests have detailed logging for debugging
-- **Use fixtures**: Leverage `loginAs()`, `userPage`, and `adminPage` fixtures
-- **Tag appropriately**: Use `@smoke`, `@regression`, `@critical` tags
-
----
-
-## 🆘 Get Help
-
-- **Issues**: [GitHub Issues](https://github.com/YOUR_USERNAME/playwright-test-automation-framework/issues)
-- **Playwright Docs**: [playwright.dev](https://playwright.dev)
-- **OrangeHRM Demo**: [opensource-demo.orangehrmlive.com](https://opensource-demo.orangehrmlive.com)
-
----
-
-**Happy Testing! 🎭**
+Happy testing 🎭

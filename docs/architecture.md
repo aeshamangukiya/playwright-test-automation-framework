@@ -1,213 +1,261 @@
-## Architecture Overview
+# 🏗️ Architecture
 
-This framework is a **modular, enterprise-style Playwright test automation framework** built around:
+This document explains how the framework is layered, what each layer is
+responsible for, and the design principles that keep it maintainable.
 
-- **Config-driven environments** (`config/`)
-- **Page Object Model (POM)** (`lib/pages/`)
-- **Role-based fixtures** (`lib/fixtures/`)
-- **Centralized test data & constants** (`lib/data/`)
-- **Focused helpers & utilities** (`lib/helpers/`, `lib/utils/`)
-- **Behaviour-driven spec layout** (`specs/features/`, `specs/setup/`)
-
-The design keeps **test intent** in the `specs/` layer and pushes **implementation details** down into pages, fixtures, and utilities.
+> 🎯 The guiding principle: **intent in specs, implementation in pages and
+> helpers, configuration in `.env` and `config/`.**
 
 ---
 
-## Folder Structure
+## Layered overview
+
+```
+┌─────────────────────────────────────────────┐
+│  specs/                                     │  ← business intent
+│  └ features/<module>/*.spec.ts              │
+│  └ setup/*.setup.ts                         │
+├─────────────────────────────────────────────┤
+│  lib/fixtures                               │  ← composition (test + auth)
+├─────────────────────────────────────────────┤
+│  lib/pages          lib/helpers             │  ← UI structure  · business assertions
+├─────────────────────────────────────────────┤
+│  lib/utils          lib/data                │  ← logging, waits, generators, constants
+├─────────────────────────────────────────────┤
+│  config/                                    │  ← env, urls, browser, timeouts
+└─────────────────────────────────────────────┘
+```
+
+Every layer depends only on layers below it — never upward, never sideways
+into a sibling feature. This keeps changes localised and refactors safe.
+
+---
+
+## Folder map
 
 ```text
 config/
-  env.ts          # ENV + users from .env
-  browser.ts      # Timeouts, viewport, browser defaults
+  env.ts          # Strict .env loader: ENVIRONMENT + base URL + users
+  browser.ts      # Viewport, action / navigation / expect / test timeouts
   urls.ts         # Application route fragments
 
 lib/
-  pages/          # Page Objects (Base, Auth, Dashboard)
-  fixtures/       # test + role-based fixtures (loginAs, userPage, adminPage)
-  helpers/        # AssertionHelper (business assertions)
-  utils/          # Logger, Wait, DataGenerator
   data/
-    users.ts      # ENV-driven user map
-    constants/    # roles, messages, app-constants, ui-constants
+    users.ts                  # ENV-driven user map
+    constants/
+      roles.ts                # USER_ROLES (constant object + type)
+      messages.ts             # User-facing strings (alerts, toasts)
+      ui-constants.ts         # Labels, buttons, menu options
+      app-constants.ts        # Storage path, timeouts, role permissions
+
+  fixtures/
+    base.fixture.ts           # loginPage, dashboardPage (page objects only)
+    auth.fixture.ts           # loginAs(role), userPage, adminPage
+    index.ts                  # mergeTests entry point
+
+  helpers/
+    AssertionHelper.ts        # Business assertions (URL, role visibility, …)
+
+  pages/
+    base/BasePage.ts          # goto, click, stableFill, expectVisible
+    auth/LoginPage.ts
+    dashboard/DashboardPage.ts
+
+  utils/
+    Logger.ts                 # Timestamped, level-tagged console logging
+    Wait.ts                   # Explicit waits (URL, visible, hidden, until)
+    DataGenerator.ts          # PW_{Entity}_{UniqueId} pattern
 
 specs/
-  features/       # Business-facing tests (auth, dashboard, ...)
-  setup/          # One-time auth setup (storage state)
+  setup/auth.setup.ts         # One-time login; persists storage state
+  features/auth/login.spec.ts
+  features/dashboard/dashboard.spec.ts
 ```
 
-This structure is intentionally **flat and predictable** so that new engineers can quickly discover where a given responsibility lives.
+---
+
+## Layer responsibilities
+
+### `config/`
+
+| File         | Responsibility                                                        |
+| ------------ | --------------------------------------------------------------------- |
+| `env.ts`     | Strict reader for `.env` — fails fast on missing required values      |
+| `browser.ts` | Centralised viewport and timeout constants                            |
+| `urls.ts`    | Application route fragments (combined with `ENV.BASE_URL` at runtime) |
+
+**Rule:** Nothing outside `env.ts` reads `process.env`. If you need a new
+environment variable, add it to `env.ts` and re-export it through the `ENV`
+constant.
 
 ---
 
-## Key Components
+### `lib/pages/`
 
-### Config Layer (`config/`)
+Page Objects encapsulate the **structure and interactions** of a single screen.
 
-- **`env.ts`**
-  - Single entry point for environment-specific values.
-  - Reads from `.env` via `dotenv`.
-  - Exposes `ENV.BASE_URL` and `ENV.USERS` (USER/ADMIN) to the rest of the framework.
-  - All environment-sensitive code should depend on this module, **not** on `process.env` directly.
+- **`BasePage`** provides safe primitives every concrete page reuses:
+    - `goto(url)` — navigates with `domcontentloaded` semantics
+    - `click(locator)` — waits for visibility before clicking
+    - `stableFill(locator, value)` — clears via real keyboard input, types
+      sequentially, then asserts `toHaveValue` to prevent silent failures
+    - `expectVisible` / `expectText` — thin wrappers over Playwright `expect`
+- **Concrete pages** (`LoginPage`, `DashboardPage`) declare locators as
+  `readonly` fields and expose `async` actions / verifications.
 
-- **`browser.ts`**
-  - Central definitions for timeouts and viewport presets.
-  - Consumed by `playwright.config.ts` to keep config in one place.
-
-- **`urls.ts`**
-  - Contains **relative route fragments** such as `LOGIN`, `DASHBOARD`, `PIM`, `LEAVE`.
-  - Combined with `ENV.BASE_URL` to build full URLs.
-  - Prevents hardcoded paths scattered across pages and specs.
+**Rule:** Page objects don't know about test data or env variables — they
+receive everything as arguments.
 
 ---
 
-### Page Objects (`lib/pages/`)
+### `lib/fixtures/`
 
-- **`BasePage`**
-  - Wraps Playwright `Page` with **stable enterprise primitives**:
-    - `goto()` with consistent navigation semantics.
-    - `click()` with visibility wait.
-    - `stableFill()` with keyboard-based clear and `toHaveValue` assertion.
-    - `expectVisible()` convenience wrapper around `expect(locator).toBeVisible()`.
-  - All concrete page classes extend `BasePage` to get consistent interaction patterns.
+The fixtures layer is the **single integration point** between specs and the
+underlying page objects. It is split into two files:
 
-- **`LoginPage`**
-  - Encapsulates login form locators & actions.
-  - Uses `ENV.BASE_URL` to open the login page (no hardcoded host).
-  - Exposes `openLoginPage()` and `login(username, password)` actions.
+| File                | Provides                                                              |
+| ------------------- | --------------------------------------------------------------------- |
+| `base.fixture.ts`   | `loginPage`, `dashboardPage` — page objects bound to the active page  |
+| `auth.fixture.ts`   | `loginAs(role)`, `userPage`, `adminPage` — authenticated contexts     |
+| `index.ts`          | Merges both fixtures into a single `test` export                       |
 
-- **`DashboardPage`**
-  - Encapsulates dashboard behaviour:
-    - `verifyDashboardLoaded()` – validates URL via `AssertionHelper` and logs via `Logger`.
-    - `verifyAssignLeaveVisible()` – asserts that the **Assign Leave** menu option is visible.
-  - Uses `URLS` and `UI_CONSTANTS` instead of inline strings where appropriate.
+A spec only ever imports from `index.ts`:
 
----
+```ts
+import { test, expect } from '../../lib/fixtures';
+```
 
-### Fixtures (`lib/fixtures/`)
-
-The fixtures layer is the **primary integration point** for tests:
-
-- Extends Playwright `test` with:
-  - `loginPage`, `dashboardPage` – ready-to-use Page Objects.
-  - `loginAs(role)` – reusable role-based login action.
-  - `userPage`, `adminPage` – automatically logged-in dashboard instances for `USER` and `ADMIN`.
-
-Benefits:
-
-- Tests express **intent** (`loginAs(USER_ROLES.USER)`) rather than low-level steps.
-- Login logic is maintained in **one place** and reused across:
-  - Specs (e.g. `login.spec.ts`)
-  - Setup (`auth.setup.ts` for storage state)
+**Why split?** Because adding new feature fixtures (e.g. `paymentPage`)
+shouldn't touch the auth fixture, and adding new authentication flows
+shouldn't touch the base fixture.
 
 ---
 
-### Data & Constants (`lib/data/`)
+### `lib/helpers/`
 
-- **`users.ts`**
-  - Binds user roles to environment-driven credentials from `ENV`.
-  - Prevents direct `.env` access anywhere else in the codebase.
+Cross-cutting **business assertions** that build on Playwright's `expect`.
 
-- **`constants/roles.ts`**
-  - Defines `USER_ROLES` as a **constant object** (not an enum) for better typing and flexibility.
-  - Used across fixtures and specs.
+- `AssertionHelper.urlContains(page, partial)` — used by `DashboardPage`
+  to verify dashboard navigation.
 
-- **`constants/messages.ts`, `constants/ui-constants.ts`, `constants/app-constants.ts`**
-  - Collect UI labels, user-facing messages, and global test constants.
-  - `APP_CONSTANTS` includes:
-    - `TEST_PREFIX` used by `DataGenerator`.
-    - Shared timeout buckets.
-    - Example role permissions metadata for future authorization assertions.
-
-- **`utils/DataGenerator.ts`**
-  - Centralized random data creation following an **enterprise naming convention**:
-    - Pattern: `PW_{Entity}_{UniqueIdentifier}`
-  - Provides helpers such as `user()`, `email()`, `entityName()`, `title()`, `number()`, `date()`.
-  - Intended usage:
-    - Create stable but unique business entities in future feature specs (PIM records, leave requests, etc.).
+Helpers don't hold locators (that's the page object's job) and don't depend
+on env values (that's `config/`'s job). They glue the two together at the
+business-assertion level.
 
 ---
 
-### Helpers & Utils
+### `lib/utils/`
 
-- **`helpers/AssertionHelper.ts`**
-  - Houses **business-level assertions** that build on Playwright’s `expect`.
-  - Example: `urlContains(page, URLS.DASHBOARD)` for consistent URL checks.
-  - Does **not** replace `expect` – tests are still free to use raw Playwright assertions where appropriate.
+| File              | Purpose                                                                 |
+| ----------------- | ----------------------------------------------------------------------- |
+| `Logger.ts`       | Timestamped console logging with levels: `info`, `debug`, `warn`, `error`, `success`, `step`, `assertion`, `api`, `navigation` |
+| `Wait.ts`         | Explicit waits — replaces ad-hoc `waitForTimeout` calls                  |
+| `DataGenerator.ts`| `PW_{Entity}_{UniqueId}` naming for unique test data                     |
 
-- **`utils/Logger.ts`**
-  - Central logging with clear log levels (`info`, `debug`, `warn`, `error`, `success`, `step`, `assertion`, `api`, `navigation`).
-  - Provides timestamped and levelled output for **CI-friendly diagnostics**.
-
-- **`utils/Wait.ts`**
-  - Encapsulates explicit waiting patterns:
-    - Page-level (`forNetworkIdle`, `forDomContentLoaded`, `forPageLoad`, `forURL`)
-    - Locator-level (`forVisible`, `forHidden`, `forDetached`, `forEnabled`, `forDisabled`, `forText`, `forCount`)
-    - Utility (`until`, `pause`)
-  - Helps avoid ad-hoc sleeps and promotes explicit, reusable synchronization patterns.
+`Wait.pause(page, ms)` is the **only** place where a fixed timeout is allowed,
+and even then only outside CI (it short-circuits when `process.env.CI` is set).
 
 ---
 
-### Specs & Setup (`specs/`)
+### `lib/data/`
 
-- **`specs/setup/auth.setup.ts`**
-  - Logs in once using the shared `loginAs` fixture.
-  - Verifies dashboard load.
-  - Persists storage state to `APP_CONSTANTS.STORAGE_PATH` for reuse across projects.
-
-- **`specs/features/...`**
-  - Contain business-readable scenarios, e.g.:
-    - `auth/login.spec.ts`
-    - `dashboard/dashboard.spec.ts`
-  - Use:
-    - Tags (`@smoke`, `@regression`, `@critical`) for selective runs.
-    - Role-based fixtures and page objects for concise tests.
+| File                            | Purpose                                                          |
+| ------------------------------- | ---------------------------------------------------------------- |
+| `users.ts`                      | Maps `USER_ROLES.USER` / `.ADMIN` to credentials from `ENV.USERS` |
+| `constants/roles.ts`            | `USER_ROLES` constant object + `UserRole` union type              |
+| `constants/messages.ts`         | User-facing copy (login failure, required field, success)         |
+| `constants/ui-constants.ts`     | Labels, buttons, menu options                                     |
+| `constants/app-constants.ts`    | `TEST_PREFIX`, `STORAGE_PATH`, timeout buckets, role permissions  |
 
 ---
 
-## Enterprise Design Principles
+### `specs/`
 
-This framework adheres to several enterprise automation principles:
+| Folder      | Contents                                                              |
+| ----------- | --------------------------------------------------------------------- |
+| `setup/`    | One-off setup specs (`*.setup.ts`) — run by the `setup-auth` project  |
+| `features/` | Business-readable specs grouped by module (`auth`, `dashboard`, …)    |
 
-- **Single Source of Truth**
-  - All environment-related values live in `config/env.ts` + `.env`.
-  - All URLs live in `config/urls.ts`.
-  - All role/user mappings live in `lib/data/`.
+Each test must:
 
-- **Separation of Concerns**
-  - **Specs** describe **behaviour** and business intent.
-  - **Pages** encapsulate UI structure and interactions.
-  - **Fixtures** coordinate authentication and role context.
-  - **Helpers/Utils** provide shared cross-cutting concerns (logging, waits, data).
-
-- **No Hardcoded URLs in Tests**
-  - Tests rely on `ENV.BASE_URL` + `URLS.*`.
-  - Swapping environments is done purely via `.env` without touching code.
-
-- **Role-Based Access Testing**
-  - Roles are explicit (`USER_ROLES`).
-  - Fixtures provide logged-in contexts per role (`userPage`, `adminPage`) to prepare for richer RBAC coverage.
-
-- **CI/CD Ready**
-  - `playwright.config.ts` is projectized (`prepare-auth`, `after-login`, `before-login`).
-  - Reports and artifacts (HTML + Allure) are generated under standard folders for archiving.
-  - `.gitignore` ensures artifacts and env files are not committed.
+1. Carry at least one tag (`@smoke`, `@regression`, …).
+2. Use a `TEST-ID:` prefix in the title for traceability.
+3. Use fixtures from `lib/fixtures` instead of manual login plumbing.
 
 ---
 
-## Extension Points
+## Playwright projects
 
-When extending the framework:
+`playwright.config.ts` declares three projects with explicit dependencies so a
+single `npx playwright test` invocation resolves the full order automatically:
 
-- **New Feature / Module**
-  - Create a new Page Object in `lib/pages/<feature>/`.
-  - Add any new routes to `config/urls.ts`.
-  - Add new specs under `specs/features/<feature>/`.
+| Project           | Pattern                  | Storage state             | Purpose                                     |
+| ----------------- | ------------------------ | ------------------------- | ------------------------------------------- |
+| `setup-auth`      | `*.setup.ts`             | _writes_ `storage/auth/user.json` | Logs in once, captures session              |
+| `authenticated`   | All non-login specs      | _reads_ persisted session | Authenticated feature specs                  |
+| `unauthenticated` | `*login.spec.ts`         | none                      | Fresh-session login & validation tests       |
 
-- **New Role**
-  - Extend `USER_ROLES` and `APP_CONSTANTS.ROLE_PERMISSIONS` as needed.
-  - Add corresponding credentials in `.env` and surface them via `config/env.ts` → `lib/data/users.ts`.
-  - Optionally add a new fixture (e.g. `managerPage`) in `lib/fixtures/index.ts`.
+Dependency chain:
 
-- **Additional Environments**
-  - Add more keys in `.env` (e.g. `QA_*`) and extend `ENV_CONFIG` in `config/env.ts` if needed.
+```
+setup-auth  ─►  authenticated
+unauthenticated   (independent — fresh session)
+```
 
+---
+
+## Reporting pipeline
+
+Playwright is configured with multiple reporters in parallel:
+
+| Reporter            | Output                       | Used by                                |
+| ------------------- | ---------------------------- | -------------------------------------- |
+| `list`              | stdout                       | Human + CI logs                        |
+| `html`              | `playwright-report/`         | `npm run report`                       |
+| `allure-playwright` | `allure-results/`            | `npm run allure:report`, CI artifact   |
+| `junit`             | `test-results/results.xml`   | External CI dashboards                 |
+| `json`              | `test-results/results.json`  | Regression workflow step summary       |
+
+Screenshots, videos, and traces are captured **only on failure** to keep
+artefact size small.
+
+---
+
+## Quality gates
+
+| Gate               | Tool                              | Trigger                       |
+| ------------------ | --------------------------------- | ----------------------------- |
+| Type safety        | TypeScript strict mode            | `npm run typecheck` (local + CI) |
+| Security           | CodeQL                            | `codeql.yml` (push/PR/weekly) |
+| Dependency hygiene | Dependabot (npm + GitHub Actions) | Weekly                        |
+
+---
+
+## Design principles
+
+1. **Single source of truth.** Environment values live in `.env` → `config/env.ts`.
+   URLs live in `config/urls.ts`. Test data lives in `lib/data/`.
+2. **Separation of concerns.** Specs describe behaviour. Pages encapsulate UI.
+   Fixtures coordinate auth. Utils handle cross-cutting concerns.
+3. **Fail fast.** `config/env.ts` throws on missing variables so issues surface
+   at startup, not mid-suite.
+4. **No magic strings.** Every label, message, or URL is referenced through a
+   constant or via `URLS` / `MESSAGES` / `UI_CONSTANTS`.
+5. **Tests express intent.** A spec reads like a business scenario, with low-level
+   plumbing delegated to fixtures.
+6. **Stability over speed.** `stableFill` enforces `toHaveValue`; `Wait.*` waits on
+   real conditions instead of fixed sleeps.
+
+---
+
+## Extending the framework
+
+| Task                  | Where to change                                                           |
+| --------------------- | ------------------------------------------------------------------------- |
+| New module / page     | Add `lib/pages/<module>/<Page>.ts`, add route to `config/urls.ts`         |
+| New role              | Extend `USER_ROLES` + credentials in `.env` + map in `lib/data/users.ts`  |
+| New environment       | Add `<NAME>_*` vars in `.env` and update `VALID_ENVIRONMENTS` in `env.ts` |
+| New fixture           | Add to `auth.fixture.ts` (auth-aware) or create a new `*.fixture.ts`     |
+| New shared assertion  | Add to `lib/helpers/AssertionHelper.ts`                                   |
+
+See [CONTRIBUTING → Coding Standards](../CONTRIBUTING.md#coding-standards) for naming rules and PR expectations.

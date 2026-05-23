@@ -1,0 +1,101 @@
+name: 🐛 Bug Report
+description: Report a defect in the framework or a test
+title: '[BUG] '
+labels: ['bug', 'triage']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to file a bug report! Please complete the form below so we can reproduce and fix it quickly.
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: One or two sentences describing the problem.
+      placeholder: e.g. `npm run test:smoke` fails on Node 22 with TypeError in Logger.ts
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      description: A minimal, exact sequence of commands and actions.
+      placeholder: |
+        1. `npm install`
+        2. `npx playwright install --with-deps chromium`
+        3. `npm run test:smoke`
+        4. See error in `LoginPage.ts`
+      render: bash
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behaviour
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behaviour
+    validations:
+      required: true
+
+  - type: input
+    id: node-version
+    attributes:
+      label: Node version
+      placeholder: e.g. v20.11.1
+    validations:
+      required: true
+
+  - type: input
+    id: playwright-version
+    attributes:
+      label: Playwright version
+      placeholder: e.g. 1.57.0
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating System
+      options:
+        - Windows
+        - macOS
+        - Linux
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: environment
+    attributes:
+      label: ENVIRONMENT value
+      options:
+        - staging
+        - production
+        - other
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / Trace / Screenshots
+      description: Drop relevant Playwright traces, screenshots, or stack traces here.
+
+  - type: checkboxes
+    id: confirmations
+    attributes:
+      label: Confirmations
+      options:
+        - label: I searched the [existing issues](https://github.com/aeshamangukiya/playwright-test-automation-framework/issues) for duplicates.
+          required: true
+        - label: I have read the [CONTRIBUTING guide](../blob/master/CONTRIBUTING.md).
+          required: true

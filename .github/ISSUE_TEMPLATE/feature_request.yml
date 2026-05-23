@@ -1,0 +1,40 @@
+name: ✨ Feature Request
+description: Suggest an enhancement or new capability for the framework
+title: '[FEATURE] '
+labels: ['enhancement', 'triage']
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What problem are you trying to solve? Why does it matter?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed Solution
+      description: Describe the behaviour or API you would like.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Other approaches you evaluated and why you ruled them out.
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: Links, screenshots, code snippets, or references.
+
+  - type: checkboxes
+    id: confirmations
+    attributes:
+      label: Confirmations
+      options:
+        - label: I searched the [existing issues](https://github.com/aeshamangukiya/playwright-test-automation-framework/issues) and there is no duplicate.
+          required: true

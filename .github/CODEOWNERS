@@ -1,0 +1,19 @@
+# =============================================================================
+#  CODEOWNERS — automatically request reviews from listed owners on PRs.
+#  Docs: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+# =============================================================================
+
+# Default owner for everything in the repo
+*                                @aeshamangukiya
+
+# CI / workflows
+/.github/                        @aeshamangukiya
+
+# Framework core
+/lib/                            @aeshamangukiya
+/config/                         @aeshamangukiya
+/playwright.config.ts            @aeshamangukiya
+
+# Documentation
+/docs/                           @aeshamangukiya
+README.md                        @aeshamangukiya

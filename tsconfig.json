@@ -1,36 +1,30 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
+    "target": "ES2022",
     "module": "commonjs",
-    "lib": [
-      "ES2020",
-      "DOM"
-    ],
-    "strict": true,
-    "esModuleInterop": true,
+    "lib": ["ES2022", "DOM"],
+    "types": ["node", "@playwright/test"],
+
     "moduleResolution": "node",
+    "esModuleInterop": true,
     "resolveJsonModule": true,
+    "isolatedModules": true,
     "skipLibCheck": true,
-    "types": [
-      "node",
-      "@playwright/test"
-    ],
+    "forceConsistentCasingInFileNames": true,
+
+    "strict": true,
+    "noImplicitOverride": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noFallthroughCasesInSwitch": true,
+
     "baseUrl": ".",
     "paths": {
-      "@config/*": [
-        "config/*"
-      ],
-      "@lib/*": [
-        "lib/*"
-      ],
-      "@specs/*": [
-        "specs/*"
-      ]
+      "@config/*": ["config/*"],
+      "@lib/*": ["lib/*"],
+      "@specs/*": ["specs/*"]
     }
   },
-  "include": [
-    "config",
-    "lib",
-    "specs"
-  ]
+  "include": ["config", "lib", "specs", "playwright.config.ts"],
+  "exclude": ["node_modules", "dist", "playwright-report", "allure-results", "test-results"]
 }

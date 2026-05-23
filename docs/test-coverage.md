@@ -1,299 +1,154 @@
-# Test Coverage Documentation
+# 🧪 Test Coverage
 
-## 📊 Complete Test Case Overview
+This document catalogues every test case in the framework — including tags,
+severity, and intent — so it stays readable as the suite grows.
 
-This document provides a comprehensive overview of all test cases in the framework, organized by feature and test type.
-
----
-
-## Authentication Tests (`specs/features/auth/login.spec.ts`)
-
-### Positive Scenarios
-
-| Test ID | Test Name | Tags | Description |
-|---------|-----------|------|-------------|
-| USER-001 | User can login successfully with valid credentials | @smoke, @regression, @critical | Validates successful login for standard User role with valid credentials |
-| ADMIN-001 | Admin can login successfully with valid credentials | @smoke, @regression, @critical | Validates successful login for Admin role with valid credentials |
-| AUTH-003 | User can login directly using login page | @regression | Tests direct login flow using LoginPage without fixtures |
-
-**Coverage:**
-- ✅ Role-based authentication (User/Admin)
-- ✅ Session establishment
-- ✅ Post-login redirection to Dashboard
-- ✅ Storage state creation
+> 🔁 When you add a new spec, please update this file in the same PR.
 
 ---
 
-### Negative Scenarios
+## At a glance
 
-| Test ID | Test Name | Tags | Description |
-|---------|-----------|------|-------------|
-| AUTH-101 | Login fails with invalid username | @regression, @negative | Validates error handling for invalid username with valid password |
-| AUTH-102 | Login fails with invalid password | @regression, @negative | Validates error handling for valid username with invalid password |
-| AUTH-103 | Login fails with both invalid credentials | @regression, @negative | Validates error handling when both username and password are invalid |
+| Metric           | Value |
+| ---------------- | ----- |
+| Total test cases | **19**  |
+| Smoke            | 8     |
+| Regression       | 19    |
+| Critical         | 4     |
+| Negative         | 3     |
+| Validation       | 3     |
+| RBAC             | 2     |
 
-**Coverage:**
-- ✅ Invalid credential rejection
-- ✅ Error message display
-- ✅ Security validation
-- ✅ Failed login handling
+Approximate execution time on a single worker against the OrangeHRM demo:
 
----
+| Suite            | Tests | Duration       |
+| ---------------- | ----- | -------------- |
+| `@smoke`         | 8     | ~2-3 min       |
+| `@regression`    | 19    | ~8-10 min      |
+| Full run (incl. setup) | 20+ | ~10-12 min  |
 
-### Validation Scenarios
-
-| Test ID | Test Name | Tags | Description |
-|---------|-----------|------|-------------|
-| AUTH-104 | Login fails with empty username | @regression, @validation | Validates form validation for empty username field |
-| AUTH-105 | Login fails with empty password | @regression, @validation | Validates form validation for empty password field |
-| AUTH-106 | Login fails with both fields empty | @regression, @validation | Validates form validation when both fields are empty |
-
-**Coverage:**
-- ✅ Form field validation
-- ✅ Required field enforcement
-- ✅ Empty input handling
-- ✅ Client-side validation
+CI shards regression across two runners, cutting wall-clock time roughly in half.
 
 ---
 
-### Role-Based Access Control (RBAC)
+## Tag legend
 
-| Test ID | Test Name | Tags | Description |
-|---------|-----------|------|-------------|
-| ROLE-001 | User and Admin have different access levels | @regression, @rbac | Validates User role can access dashboard with appropriate permissions |
-| ROLE-002 | Admin has full system access | @regression, @rbac | Validates Admin role has full system access post-login |
-
-**Coverage:**
-- ✅ User role permissions
-- ✅ Admin role permissions
-- ✅ Role-based dashboard access
-- ✅ Access control verification
+| Tag           | Meaning                                                             |
+| ------------- | ------------------------------------------------------------------- |
+| `@smoke`      | Fast, high-value happy paths — runs on every PR                      |
+| `@regression` | Broader coverage — runs on `master` and nightly                       |
+| `@critical`   | Business-critical scenarios                                          |
+| `@negative`   | Negative paths (invalid credentials, error responses)                 |
+| `@validation` | Form / input validation                                              |
+| `@rbac`       | Role-based access control                                            |
 
 ---
 
-## Dashboard Tests (`specs/features/dashboard/dashboard.spec.ts`)
+## Authentication (`specs/features/auth/login.spec.ts`)
 
-### Dashboard - User Role
+### Positive
 
-| Test ID | Test Name | Tags | Description |
-|---------|-----------|------|-------------|
-| DASH-001 | User can access dashboard successfully | @smoke, @regression | Validates User role can access dashboard using userPage fixture |
-| DASH-002 | User dashboard displays Assign Leave option | @smoke, @regression | Validates Assign Leave option visibility for User role |
-| DASH-003 | User can navigate to dashboard directly | @regression | Validates direct URL navigation to dashboard for User role |
+| Test ID    | Title                                                  | Tags                              | Severity |
+| ---------- | ------------------------------------------------------ | --------------------------------- | -------- |
+| `USER-001` | User can login successfully with valid credentials     | `@smoke @regression @critical`    | Critical |
+| `ADMIN-001`| Admin can login successfully with valid credentials    | `@smoke @regression @critical`    | Critical |
+| `AUTH-003` | User can login directly using login page               | `@regression`                     | Normal   |
 
-**Coverage:**
-- ✅ User role dashboard access
-- ✅ Dashboard element visibility
-- ✅ Navigation validation
-- ✅ URL verification
+### Negative
 
----
+| Test ID    | Title                                            | Tags                       | Severity |
+| ---------- | ------------------------------------------------ | -------------------------- | -------- |
+| `AUTH-101` | Login fails with invalid username                | `@regression @negative`    | Normal   |
+| `AUTH-102` | Login fails with invalid password                | `@regression @negative`    | Normal   |
+| `AUTH-103` | Login fails with both invalid credentials        | `@regression @negative`    | Normal   |
 
-### Dashboard - Admin Role
+### Validation
 
-| Test ID | Test Name | Tags | Description |
-|---------|-----------|------|-------------|
-| DASH-101 | Admin can access dashboard successfully | @smoke, @regression | Validates Admin role can access dashboard using adminPage fixture |
-| DASH-102 | Admin dashboard displays Assign Leave option | @smoke, @regression | Validates Assign Leave option visibility for Admin role |
-| DASH-103 | Admin can navigate to dashboard directly | @regression | Validates direct URL navigation to dashboard for Admin role |
+| Test ID    | Title                                  | Tags                         | Severity |
+| ---------- | -------------------------------------- | ---------------------------- | -------- |
+| `AUTH-104` | Login fails with empty username        | `@regression @validation`    | Normal   |
+| `AUTH-105` | Login fails with empty password        | `@regression @validation`    | Normal   |
+| `AUTH-106` | Login fails with both fields empty     | `@regression @validation`    | Normal   |
 
-**Coverage:**
-- ✅ Admin role dashboard access
-- ✅ Dashboard element visibility
-- ✅ Navigation validation
-- ✅ URL verification
+### Role-based access (RBAC)
 
----
-
-### Dashboard - Common Functionality
-
-| Test ID | Test Name | Tags | Description |
-|---------|-----------|------|-------------|
-| DASH-201 | Dashboard Assign Leave option is visible | @smoke, @regression | Validates Assign Leave option is visible on dashboard |
-| DASH-202 | Dashboard loads after login | @regression | Validates dashboard loads correctly after authentication |
-
-**Coverage:**
-- ✅ Post-login navigation
-- ✅ Dashboard loading
-- ✅ Element visibility
-- ✅ Session validation
+| Test ID    | Title                                                | Tags                  | Severity |
+| ---------- | ---------------------------------------------------- | --------------------- | -------- |
+| `ROLE-001` | User and Admin have different access levels          | `@regression @rbac`   | Normal   |
+| `ROLE-002` | Admin has full system access                         | `@regression @rbac`   | Normal   |
 
 ---
 
-## Test Statistics
+## Dashboard (`specs/features/dashboard/dashboard.spec.ts`)
 
-### Overall Coverage
+### User role
 
-- **Total Test Cases**: 15
-- **Smoke Tests**: 8
-- **Regression Tests**: 15
-- **Critical Tests**: 4
-- **Negative Tests**: 3
-- **Validation Tests**: 3
-- **RBAC Tests**: 2
+| Test ID    | Title                                                  | Tags                  | Severity |
+| ---------- | ------------------------------------------------------ | --------------------- | -------- |
+| `DASH-001` | User can access dashboard successfully                 | `@smoke @regression`  | Critical |
+| `DASH-002` | User dashboard displays Assign Leave option            | `@smoke @regression`  | Normal   |
+| `DASH-003` | User can navigate to dashboard directly                | `@regression`         | Normal   |
 
-### Test Distribution by Feature
+### Admin role
 
-| Feature | Test Count | Coverage |
-|---------|-----------|----------|
-| Authentication | 11 | Login, Logout, Session, Validation, RBAC |
-| Dashboard | 8 | User Access, Admin Access, Element Visibility |
+| Test ID    | Title                                                  | Tags                  | Severity |
+| ---------- | ------------------------------------------------------ | --------------------- | -------- |
+| `DASH-101` | Admin can access dashboard successfully                | `@smoke @regression`  | Critical |
+| `DASH-102` | Admin dashboard displays Assign Leave option           | `@smoke @regression`  | Normal   |
+| `DASH-103` | Admin can navigate to dashboard directly               | `@regression`         | Normal   |
 
-### Test Distribution by Type
+### Common
 
-| Type | Count | Percentage |
-|------|-------|-----------|
-| Positive | 9 | 60% |
-| Negative | 3 | 20% |
-| Validation | 3 | 20% |
+| Test ID    | Title                                       | Tags                  | Severity |
+| ---------- | ------------------------------------------- | --------------------- | -------- |
+| `DASH-201` | Dashboard Assign Leave option is visible    | `@smoke @regression`  | Normal   |
+| `DASH-202` | Dashboard loads after login                 | `@regression`         | Normal   |
 
 ---
 
-## Tag-Based Execution
-
-### Smoke Test Suite (`@smoke`)
-**Purpose**: Fast validation of critical functionality  
-**Execution Time**: ~2-3 minutes  
-**Test Count**: 8 tests
+## Execution recipes
 
 ```bash
+# Tag-based slices
 npm run test:smoke
-```
-
-**Includes**:
-- USER-001, ADMIN-001 (Critical login paths)
-- DASH-001, DASH-002 (User dashboard)
-- DASH-101, DASH-102 (Admin dashboard)
-- DASH-201 (Common dashboard)
-
----
-
-### Regression Test Suite (`@regression`)
-**Purpose**: Comprehensive validation of all functionality  
-**Execution Time**: ~8-10 minutes  
-**Test Count**: 15 tests (all tests)
-
-```bash
 npm run test:regression
+npm run test:critical
+npm run test:negative
+npm run test:rbac
+
+# Run a single feature
+npx playwright test specs/features/auth/login.spec.ts
+npx playwright test specs/features/dashboard/dashboard.spec.ts
+
+# Run by Test ID prefix (e.g. all AUTH-1xx negative tests)
+npx playwright test --grep "AUTH-10"
 ```
 
-**Includes**: All test cases
+---
+
+## Adding new tests
+
+Each new spec should:
+
+1. Live under `specs/features/<module>/<feature>.spec.ts`.
+2. Carry a Test ID prefix (e.g. `PIM-001`, `LEAVE-101`).
+3. Use the role-based fixtures (`loginAs`, `userPage`, `adminPage`) — no manual login.
+4. Use page objects for **all** locators; no inline selectors in specs.
+5. Be added to the relevant table in this document.
+
+See [CONTRIBUTING → Adding New Tests](../CONTRIBUTING.md#adding-new-tests).
 
 ---
 
-### Critical Test Suite (`@critical`)
-**Purpose**: Business-critical validation  
-**Test Count**: 4 tests
+## Roadmap
 
-```bash
-npx playwright test --grep @critical
-```
+Planned expansion (contributions welcome):
 
-**Includes**:
-- USER-001, ADMIN-001 (Login)
-- DASH-001, DASH-101 (Dashboard access)
-
----
-
-### Negative Test Suite (`@negative`)
-**Purpose**: Error handling and security validation  
-**Test Count**: 3 tests
-
-```bash
-npx playwright test --grep @negative
-```
-
-**Includes**: AUTH-101, AUTH-102, AUTH-103
-
----
-
-### Validation Test Suite (`@validation`)
-**Purpose**: Form validation and input handling  
-**Test Count**: 3 tests
-
-```bash
-npx playwright test --grep @validation
-```
-
-**Includes**: AUTH-104, AUTH-105, AUTH-106
-
----
-
-### RBAC Test Suite (`@rbac`)
-**Purpose**: Role-based access control validation  
-**Test Count**: 2 tests
-
-```bash
-npx playwright test --grep @rbac
-```
-
-**Includes**: ROLE-001, ROLE-002
-
----
-
-## Test Execution Projects
-
-The framework uses Playwright's project feature for optimized test execution:
-
-### 1. prepare-auth
-- **Purpose**: Setup authentication state
-- **Runs**: `auth.setup.ts`
-- **Creates**: `storage/user.auth.json`
-- **Dependencies**: None
-
-### 2. after-login
-- **Purpose**: Tests requiring authentication
-- **Runs**: Dashboard tests
-- **Uses**: Saved session from prepare-auth
-- **Dependencies**: prepare-auth
-
-### 3. before-login
-- **Purpose**: Login and authentication tests
-- **Runs**: Login test suite
-- **Uses**: Fresh session (no storage state)
-- **Dependencies**: None (parallel with prepare-auth)
-
----
-
-## Future Test Expansion
-
-### Planned Coverage
-
-- **PIM Module**: Employee management, CRUD operations
-- **Leave Module**: Leave request, approval workflow
-- **Time Module**: Timesheet tracking
-- **Recruitment Module**: Job posting, candidate management
-- **Admin Module**: User management, configuration
-
-### Recommended Test Types
-
-- **API Integration Tests**: Validate backend APIs
-- **Visual Regression Tests**: UI screenshot comparison
-- **Performance Tests**: Page load, response time
-- **Accessibility Tests**: WCAG compliance
-- **Cross-Browser Tests**: Firefox, Safari, Edge
-- **Mobile Responsive Tests**: Mobile viewport validation
-
----
-
-## Maintenance and Updates
-
-### When to Update This Document
-
-1. **New test cases added**: Update the relevant table and statistics
-2. **Tag changes**: Update tag-based execution sections
-3. **New test types**: Add new categories
-4. **Feature expansion**: Add new feature sections
-
-### Version History
-
-- **v1.0** (2026-02-17): Initial comprehensive test documentation
-  - 15 test cases covering Authentication and Dashboard
-  - Role-based fixtures (User/Admin)
-  - Advanced CI/CD pipeline
-
----
-
-*Last Updated: 2026-02-17*  
-*Total Test Cases: 15*  
-*Framework Version: 1.0.0*
+- [ ] **PIM module** — employee CRUD coverage
+- [ ] **Leave module** — apply / approve / cancel flows
+- [ ] **Time module** — timesheet submission
+- [ ] **API layer** — token-based authentication and request fixtures
+- [ ] **Visual regression** — page-level screenshot diffs
+- [ ] **Cross-browser** — Firefox + WebKit matrix in CI
+- [ ] **Mobile viewport** — responsive checks for key flows
+- [ ] **Accessibility** — automated WCAG audits via axe-core

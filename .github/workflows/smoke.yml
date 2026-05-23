@@ -1,0 +1,94 @@
+name: Smoke Tests
+
+on:
+  pull_request:
+    branches: [master, main]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options: [staging, production]
+
+concurrency:
+  group: smoke-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  ENVIRONMENT: ${{ inputs.environment || 'staging' }}
+
+jobs:
+  smoke:
+    name: Smoke (critical paths)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
+
+      - name: Install Playwright browsers
+        run: |
+          if [ "${{ steps.playwright-cache.outputs.cache-hit }}" != "true" ]; then
+            npx playwright install --with-deps chromium
+          else
+            npx playwright install-deps chromium
+          fi
+
+      - name: Run smoke tests
+        env:
+          CI: true
+          ENVIRONMENT: ${{ env.ENVIRONMENT }}
+          STAGING_BASE_URL: ${{ secrets.STAGING_BASE_URL || 'https://opensource-demo.orangehrmlive.com' }}
+          STAGING_USER_USERNAME: ${{ secrets.STAGING_USER_USERNAME || 'Admin' }}
+          STAGING_USER_PASSWORD: ${{ secrets.STAGING_USER_PASSWORD || 'admin123' }}
+          STAGING_ADMIN_USERNAME: ${{ secrets.STAGING_ADMIN_USERNAME || 'Admin' }}
+          STAGING_ADMIN_PASSWORD: ${{ secrets.STAGING_ADMIN_PASSWORD || 'admin123' }}
+        run: npm run test:smoke
+
+      - name: Upload Playwright HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-smoke
+          path: playwright-report/
+          retention-days: 7
+
+      - name: Upload Allure results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results-smoke
+          path: allure-results/
+          retention-days: 7
+
+      - name: Upload trace / screenshots on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-smoke
+          path: test-results/
+          retention-days: 7

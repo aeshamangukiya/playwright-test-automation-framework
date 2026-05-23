@@ -1,36 +1,61 @@
 {
-    "name": "playwright-test-automation-framework",
-    "version": "1.0.0",
-    "description": "",
-    "main": "index.js",
-    "scripts": {
-        "clean:allure": "powershell -Command \"Remove-Item -Recurse -Force allure-results,allure-report -ErrorAction SilentlyContinue\"",
-
-        "test": "npx playwright test",
-        "test:smoke": "npm run clean:allure && npx playwright test --grep @smoke",
-        "test:regression": "npm run clean:allure && npx playwright test --grep @regression",
-        "test:headed": "npx playwright test --headed",
-
-        "smoke": "npm run test:smoke",
-        "regression": "npm run test:regression",
-
-        "allure:generate": "allure generate allure-results --clean -o allure-report",
-        "allure:open": "allure open allure-report",
-        "allure:report": "npm run allure:generate && npm run allure:open"
-    },
-    "keywords": [],
-    "author": "",
-    "license": "ISC",
-    "devDependencies": {
-        "@playwright/test": "^1.57.0",
-        "@types/node": "^25.0.3",
-        "allure-commandline": "^2.36.0",
-        "allure-playwright": "^3.4.3"
-    },
-    "dependencies": {
-        "dotenv": "^17.2.3"
-    },
-    "directories": {
-        "test": "tests"
-    }
+  "name": "playwright-test-automation-framework",
+  "version": "1.0.0",
+  "description": "Enterprise-grade Playwright + TypeScript test automation framework with Page Object Model, role-based fixtures, Allure reporting, and a production-ready GitHub Actions pipeline. Reference implementation against the OrangeHRM open-source demo.",
+  "keywords": [
+    "playwright",
+    "typescript",
+    "test-automation",
+    "e2e",
+    "page-object-model",
+    "allure",
+    "github-actions",
+    "orangehrm",
+    "qa",
+    "framework"
+  ],
+  "homepage": "https://github.com/aeshamangukiya/playwright-test-automation-framework#readme",
+  "bugs": {
+    "url": "https://github.com/aeshamangukiya/playwright-test-automation-framework/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aeshamangukiya/playwright-test-automation-framework.git"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Aesha Mangukiya",
+    "url": "https://github.com/aeshamangukiya"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=9.0.0"
+  },
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "test:debug": "playwright test --debug",
+    "test:smoke": "playwright test --grep @smoke",
+    "test:regression": "playwright test --grep @regression",
+    "test:critical": "playwright test --grep @critical",
+    "test:negative": "playwright test --grep @negative",
+    "test:rbac": "playwright test --grep @rbac",
+    "report": "playwright show-report",
+    "allure:generate": "allure generate allure-results --clean -o allure-report",
+    "allure:open": "allure open allure-report",
+    "allure:report": "npm run allure:generate && npm run allure:open",
+    "typecheck": "tsc --noEmit",
+    "clean": "node -e \"['test-results','allure-results','allure-report','playwright-report','storage'].forEach(d=>{try{require('fs').rmSync(d,{recursive:true,force:true});console.log('Removed: '+d);}catch(e){}})\""
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.57.0",
+    "@types/node": "^20.11.5",
+    "allure-commandline": "^2.36.0",
+    "allure-playwright": "^3.4.3",
+    "typescript": "^5.6.3"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.3"
+  }
 }

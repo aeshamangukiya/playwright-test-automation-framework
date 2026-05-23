@@ -16,11 +16,11 @@ export abstract class BasePage {
         this.page = page;
     }
 
-    async goto(url: string, timeout = 15000) {
+    async goto(url: string, timeout?: number) {
         await this.page.goto(url, { waitUntil: 'domcontentloaded', timeout });
     }
 
-    async click(locator: Locator, timeout = 10000) {
+    async click(locator: Locator, timeout?: number) {
         await locator.waitFor({ state: 'visible', timeout });
         await locator.click({ timeout });
     }

@@ -1,91 +1,85 @@
-# Node modules
+# =============================================================================
+#  Dependencies
+# =============================================================================
 node_modules/
 
-# Playwright test results
-/test-results/
-/playwright-report/
-/blob-report/
+# =============================================================================
+#  Environment variables (never commit secrets)
+# =============================================================================
+.env
+.env.local
+.env.*.local
 
-/playwright/.cache/
-/playwright/.auth/
-
-# Playwright media artifacts
-/videos/
-/screenshots/
-/trace/
-*.mp4
-*.webm
-*.png
-*.jpg
-*.jpeg
-*.gif
-*.svg
-
-# Build outputs
+# =============================================================================
+#  Build outputs
+# =============================================================================
 dist/
 build/
 out/
 *.tsbuildinfo
 
-# Coverage
+# =============================================================================
+#  Test artifacts
+# =============================================================================
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+playwright/.auth/
+allure-results/
+allure-report/
+storage/
+
+# Playwright media (kept under test-results)
+*.mp4
+*.webm
+*.zip
+
+# =============================================================================
+#  Coverage
+# =============================================================================
 coverage/
 *.lcov
 
-# Logs
+# =============================================================================
+#  Logs
+# =============================================================================
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 *.log
 
-# Environment variables
-.env
-.env.local
-.env.*.local
-
-# OS files
+# =============================================================================
+#  OS files
+# =============================================================================
 .DS_Store
 Thumbs.db
 ehthumbs.db
 Desktop.ini
 $RECYCLE.BIN/
 
-# Temporary files
-*.tmp
-*.temp
-*.swp
-*.swo
-*.bak
-*.old
-
-# Executables / binaries
-*.exe
-*.dll
-*.so
-*.dylib
-*.bin
-*.out
-
-# Editor / IDE files
+# =============================================================================
+#  Editors / IDEs
+# =============================================================================
 .vscode/
 .idea/
 *.sublime-project
 *.sublime-workspace
 *.code-workspace
 
-# Misc
-*.class
-*.pyc
-*.pyo
-*.pyd
-*.log
+# =============================================================================
+#  Temporary / cache
+# =============================================================================
+*.tmp
+*.temp
+*.swp
+*.swo
+*.bak
+*.old
 *.cache
 
-# Node lock files (optional if you want to ignore)
-package-lock.json
-yarn.lock
-pnpm-lock.yaml
-
-allure-results/
-allure-report/
-storage/
+# =============================================================================
+#  Tooling / local-only
+# =============================================================================
+.claude/

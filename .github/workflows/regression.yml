@@ -1,0 +1,158 @@
+name: Regression Tests
+
+on:
+  push:
+    branches: [master, main]
+  schedule:
+    # Daily at 02:30 UTC — keeps the demo target verified
+    - cron: '30 2 * * *'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options: [staging, production]
+
+concurrency:
+  group: regression-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  ENVIRONMENT: ${{ inputs.environment || 'staging' }}
+
+jobs:
+  regression:
+    name: Regression — shard ${{ matrix.shard }}/${{ strategy.job-total }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2]
+    env:
+      SHARD_TOTAL: 2
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
+
+      - name: Install Playwright browsers
+        run: |
+          if [ "${{ steps.playwright-cache.outputs.cache-hit }}" != "true" ]; then
+            npx playwright install --with-deps chromium
+          else
+            npx playwright install-deps chromium
+          fi
+
+      - name: Run regression shard
+        env:
+          CI: true
+          ENVIRONMENT: ${{ env.ENVIRONMENT }}
+          STAGING_BASE_URL: ${{ secrets.STAGING_BASE_URL || 'https://opensource-demo.orangehrmlive.com' }}
+          STAGING_USER_USERNAME: ${{ secrets.STAGING_USER_USERNAME || 'Admin' }}
+          STAGING_USER_PASSWORD: ${{ secrets.STAGING_USER_PASSWORD || 'admin123' }}
+          STAGING_ADMIN_USERNAME: ${{ secrets.STAGING_ADMIN_USERNAME || 'Admin' }}
+          STAGING_ADMIN_PASSWORD: ${{ secrets.STAGING_ADMIN_PASSWORD || 'admin123' }}
+        run: npx playwright test --grep @regression --shard=${{ matrix.shard }}/${{ env.SHARD_TOTAL }}
+
+      - name: Upload Playwright HTML report (shard)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-regression-shard-${{ matrix.shard }}
+          path: playwright-report/
+          retention-days: 14
+
+      - name: Upload Allure results (shard)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results-regression-shard-${{ matrix.shard }}
+          path: allure-results/
+          retention-days: 14
+
+      - name: Upload trace / screenshots on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-regression-shard-${{ matrix.shard }}
+          path: test-results/
+          retention-days: 14
+
+  merge-report:
+    name: Merge Allure & summary
+    needs: regression
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Download Allure results from shards
+        uses: actions/download-artifact@v4
+        with:
+          path: allure-results-combined
+          pattern: allure-results-regression-shard-*
+          merge-multiple: true
+
+      - name: Install Allure CLI
+        run: npm install --no-save allure-commandline
+
+      - name: Generate combined Allure report
+        run: npx allure generate allure-results-combined -o allure-report --clean
+
+      - name: Upload combined Allure report
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-report-regression
+          path: allure-report/
+          retention-days: 30
+
+      - name: Write GitHub Step Summary
+        run: |
+          {
+            echo "## 🧪 Regression Run Summary";
+            echo "";
+            echo "| Item | Value |";
+            echo "| ---- | ----- |";
+            echo "| Environment | \`${{ env.ENVIRONMENT }}\` |";
+            echo "| Trigger | \`${{ github.event_name }}\` |";
+            echo "| Branch / ref | \`${{ github.ref_name }}\` |";
+            echo "| Commit | \`${{ github.sha }}\` |";
+            echo "";
+            echo "### Artifacts";
+            echo "- Combined Allure report: \`allure-report-regression\`";
+            echo "- Per-shard Playwright reports: \`playwright-report-regression-shard-*\`";
+          } >> "$GITHUB_STEP_SUMMARY"

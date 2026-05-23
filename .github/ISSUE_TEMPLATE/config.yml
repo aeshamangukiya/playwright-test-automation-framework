@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 📖 Documentation
+    url: https://github.com/aeshamangukiya/playwright-test-automation-framework/tree/master/docs
+    about: Check the docs before filing an issue.
+  - name: 💬 Discussions
+    url: https://github.com/aeshamangukiya/playwright-test-automation-framework/discussions
+    about: Ask a question or share an idea here instead of opening an issue.
+  - name: 🔐 Security report
+    url: https://github.com/aeshamangukiya/playwright-test-automation-framework/security/advisories/new
+    about: Privately report a security vulnerability via GitHub Security Advisories.
