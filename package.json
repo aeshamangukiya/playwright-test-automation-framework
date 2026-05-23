@@ -53,7 +53,7 @@
     "@types/node": "^20.11.5",
     "allure-commandline": "^2.36.0",
     "allure-playwright": "^3.4.3",
-    "typescript": "^5.6.3"
+    "typescript": "^6.0.3"
   },
   "dependencies": {
     "dotenv": "^17.2.3"
