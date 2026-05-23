@@ -81,7 +81,7 @@ jobs:
 
       - name: Upload Playwright HTML report (shard)
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: playwright-report-regression-shard-${{ matrix.shard }}
           path: playwright-report/
@@ -89,7 +89,7 @@ jobs:
 
       - name: Upload Allure results (shard)
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: allure-results-regression-shard-${{ matrix.shard }}
           path: allure-results/
@@ -97,7 +97,7 @@ jobs:
 
       - name: Upload trace / screenshots on failure
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: test-results-regression-shard-${{ matrix.shard }}
           path: test-results/
@@ -134,7 +134,7 @@ jobs:
         run: npx allure generate allure-results-combined -o allure-report --clean
 
       - name: Upload combined Allure report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: allure-report-regression
           path: allure-report/
