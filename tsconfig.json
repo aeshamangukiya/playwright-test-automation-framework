@@ -5,7 +5,7 @@
     "lib": ["ES2022", "DOM"],
     "types": ["node", "@playwright/test"],
 
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
@@ -18,11 +18,10 @@
     "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": true,
 
-    "baseUrl": ".",
     "paths": {
-      "@config/*": ["config/*"],
-      "@lib/*": ["lib/*"],
-      "@specs/*": ["specs/*"]
+      "@config/*": ["./config/*"],
+      "@lib/*": ["./lib/*"],
+      "@specs/*": ["./specs/*"]
     }
   },
   "include": ["config", "lib", "specs", "playwright.config.ts"],
