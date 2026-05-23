@@ -50,7 +50,7 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.57.0",
-    "@types/node": "^20.11.5",
+    "@types/node": "^25.9.1",
     "allure-commandline": "^2.36.0",
     "allure-playwright": "^3.4.3",
     "typescript": "^5.6.3"
