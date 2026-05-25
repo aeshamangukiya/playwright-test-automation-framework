@@ -49,10 +49,10 @@
     "clean": "node -e \"['test-results','allure-results','allure-report','playwright-report','storage'].forEach(d=>{try{require('fs').rmSync(d,{recursive:true,force:true});console.log('Removed: '+d);}catch(e){}})\""
   },
   "devDependencies": {
-    "@playwright/test": "^1.57.0",
+    "@playwright/test": "^1.60.0",
     "@types/node": "^20.11.5",
-    "allure-commandline": "^2.36.0",
-    "allure-playwright": "^3.4.3",
+    "allure-commandline": "^2.41.0",
+    "allure-playwright": "^3.9.0",
     "typescript": "^6.0.3"
   },
   "dependencies": {
